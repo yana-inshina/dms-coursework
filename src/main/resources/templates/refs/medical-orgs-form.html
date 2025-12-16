@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Медорганизация</title>
+
+    <style>
+        :root{
+            --bg:#F6F0E6;
+            --card:#FFFFFF;
+            --ink:#1F2A37;
+            --muted:#6B7280;
+            --line:rgba(31,42,55,.10);
+            --blue:#11A6B7;
+            --blue-2:#0B8EA0;
+            --beige-2:#FFF8EE;
+            --shadow-soft:0 10px 24px rgba(31,42,55,.08);
+            --shadow:0 10px 30px rgba(17,166,183,.12);
+            --r:18px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--ink);
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+        .wrap{ max-width:1200px; margin:0 auto; padding:26px 16px 44px; }
+
+        .topbar{
+            background:rgba(255,255,255,.72);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:14px 16px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            box-shadow:var(--shadow-soft);
+            backdrop-filter:blur(8px);
+            flex-wrap:wrap;
+        }
+        .brand{
+            display:flex; align-items:center; gap:10px;
+            min-width:260px;
+        }
+        .logo{
+            width:42px; height:42px; border-radius:14px;
+            background:linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+            box-shadow:0 10px 22px rgba(17,166,183,.22);
+        }
+        .brand h1{ margin:0; font-size:18px; line-height:1.15; }
+        .brand p{ margin:2px 0 0; font-size:12px; color:var(--muted); }
+
+        .chip{
+            display:inline-flex; align-items:center; gap:8px;
+            padding:8px 10px;
+            border-radius:999px;
+            background:var(--beige-2);
+            border:1px solid rgba(31,42,55,.10);
+            font-size:13px;
+            white-space:nowrap;
+        }
+        .dot{
+            width:8px; height:8px; border-radius:50%;
+            background:var(--blue);
+            box-shadow:0 0 0 4px rgba(17,166,183,.12);
+        }
+        .spacer{ flex:1; }
+
+        .link-btn{
+            border-radius:12px;
+            padding:10px 12px;
+            font-weight:900;
+            border:1px solid rgba(17,166,183,.35);
+            background:#fff;
+            color:var(--blue-2);
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            white-space:nowrap;
+        }
+        .link-btn:hover{
+            background:rgba(17,166,183,.06);
+            border-color:rgba(17,166,183,.55);
+        }
+
+        .hero{
+            margin-top:14px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:18px;
+            box-shadow:var(--shadow-soft);
+            position:relative;
+            overflow:hidden;
+        }
+        .hero:before{
+            content:"";
+            position:absolute; inset:-60px -90px auto auto;
+            width:240px; height:240px; border-radius:50%;
+            background:radial-gradient(circle at 30% 30%, rgba(17,166,183,.28), transparent 60%);
+            transform:rotate(12deg);
+        }
+        .hero h2{ margin:0; font-size:20px; }
+        .hero p{ margin:8px 0 0; color:var(--muted); max-width:80ch; }
+
+        .btn{
+            border-radius:12px;
+            padding:9px 12px;
+            font-weight:900;
+            border:1px solid rgba(31,42,55,.14);
+            background:#fff;
+            cursor:pointer;
+            text-decoration:none;
+            white-space:nowrap;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            font-size:14px;
+        }
+        .btn:hover{
+            background:rgba(17,166,183,.06);
+            border-color:rgba(17,166,183,.40);
+        }
+        .btn-primary{
+            border-color:rgba(17,166,183,.35);
+            color:var(--blue-2);
+        }
+
+        .form-card{
+            margin-top:14px;
+            max-width:860px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:18px 18px 20px;
+            box-shadow:var(--shadow-soft);
+        }
+        .form-grid{
+            display:flex;
+            flex-direction:column;
+            gap:16px;
+        }
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+        }
+        .row-2{
+            display:flex;
+            gap:14px;
+            flex-wrap:wrap;
+        }
+        .field label{
+            font-size:13px;
+            color:var(--muted);
+        }
+        input[type="text"],
+        textarea{
+            padding:10px 12px;
+            border-radius:12px;
+            border:1px solid rgba(31,42,55,.18);
+            background:#fff;
+            outline:none;
+            font-size:14px;
+        }
+        input:focus,
+        textarea:focus{
+            border-color:rgba(17,166,183,.55);
+            box-shadow:0 0 0 4px rgba(17,166,183,.12);
+        }
+        textarea{
+            min-height:90px;
+            resize:vertical;
+        }
+
+        .check-row{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-top:4px;
+        }
+        .check-row input[type="checkbox"]{
+            width:18px;
+            height:18px;
+        }
+
+        .actions-row{
+            margin-top:6px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+        }
+
+        .hint-text{
+            font-size:13px;
+            color:var(--muted);
+        }
+
+        .error{
+            font-size:12px;
+            color:#b91c1c;
+        }
+
+        @media (max-width:640px){
+            .form-card{ padding:14px; }
+        }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo" aria-hidden="true"></div>
+            <div>
+                <h1 th:text="${title}">Медорганизация</h1>
+                <p>Добавление и редактирование клиник, работающих по ДМС.</p>
+            </div>
+        </div>
+
+        <div class="chip">
+            <span class="dot" aria-hidden="true"></span>
+            Пользователь: <b sec:authentication="name">username</b>
+        </div>
+
+        <div class="spacer"></div>
+
+        <a class="link-btn" th:href="@{/medical-orgs}">
+            ← К списку медорганизаций
+        </a>
+    </div>
+
+    <div class="hero">
+        <h2 th:text="${item.id} != null ? 'Редактирование медорганизации' : 'Новая медорганизация'">
+            Новая медорганизация
+        </h2>
+        <p>
+            Укажите официальное название, город, адрес и контакты. Эти данные будут
+            доступны менеджерам при оформлении полисов и направлениях клиентов.
+        </p>
+    </div>
+
+    <div class="form-card">
+        <form class="form-grid"
+              th:action="@{/medical-orgs/save}"
+              th:object="${item}"
+              method="post">
+
+            <input type="hidden" th:field="*{id}"/>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <div class="field">
+                <label for="name">Название медорганизации</label>
+                <input id="name"
+                       type="text"
+                       th:field="*{name}"
+                       required
+                       placeholder="Например: Городская клиническая больница №1">
+                <div class="error" th:if="${#fields.hasErrors('name')}"
+                     th:errors="*{name}">Ошибка в названии</div>
+            </div>
+
+            <div class="row-2">
+                <div class="field">
+                    <label for="ogrn">ОГРН</label>
+                    <input id="ogrn"
+                           type="text"
+                           th:field="*{ogrn}"
+                           placeholder="Например: 1027700132195"
+                           required>
+                    <div class="error" th:if="${#fields.hasErrors('ogrn')}" th:errors="*{ogrn}"></div>
+                </div>
+                <div class="field">
+                    <label for="phone">Телефон</label>
+                    <input id="phone"
+                           type="text"
+                           th:field="*{phone}"
+                           placeholder="+7 (000) 000-00-00">
+                    <div class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                </div>
+            </div>
+
+            <div class="row-2">
+                <!-- выбор региона -->
+                <div class="field" style="flex:1">
+                    <label for="region">Регион</label>
+                    <select id="region" th:field="*{region}" required>
+                        <option value="" disabled th:selected="${item.region == null}">Выберите регион</option>
+                    <!--
+                        Список регионов. В значении option передаём ID, а не объект Region.
+                        Это важно, потому что Spring MVC использует id в качестве строки
+                        для поиска сущности через конвертер StringToRegionConverter.
+                        Если передавать весь объект (как раньше), в атрибут value
+                        попадёт строка вроде "Region@7d9f6d", и конвертер не сможет
+                        преобразовать её в Long — выпадающий список окажется пустым.
+                    -->
+                    <option th:each="r : ${allRegions}" th:value="${r.id}" th:text="${r.name}"
+                                th:selected="${item.region != null and r.id == item.region.id}"></option>
+                    </select>
+                    <div class="error" th:if="${#fields.hasErrors('region')}" th:errors="*{region}"></div>
+                </div>
+                <!-- адрес -->
+                <div class="field" style="flex:1">
+                    <label for="address">Адрес</label>
+                    <input id="address"
+                           type="text"
+                           th:field="*{address}"
+                           placeholder="Улица, дом, корпус">
+                    <div class="error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="description">Примечания</label>
+                <textarea id="description"
+                          th:field="*{description}"
+                          placeholder="Особенности работы, профиль, ограничения по приёму..."></textarea>
+            </div>
+
+            <div class="field">
+                <span class="hint-text">Статус записи</span>
+                <div class="check-row">
+                    <input id="active" type="checkbox" th:field="*{active}"/>
+                    <label for="active" style="margin:0;">
+                        Медорганизация активна (доступна в полисах)
+                    </label>
+                </div>
+            </div>
+
+            <div class="actions-row">
+                <button class="btn btn-primary" type="submit">
+                    💾 Сохранить
+                </button>
+                <a class="btn" th:href="@{/medical-orgs}">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

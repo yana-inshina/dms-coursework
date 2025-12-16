@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Об авторе</title>
+
+    <style>
+        :root{
+            --bg: #f6f2ea;
+            --card: #ffffff;
+            --blue: #d7ecff;
+            --blue2: #bfe0ff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: rgba(31,41,55,0.12);
+            --shadow: 0 10px 28px rgba(31,41,55,0.10);
+            --radius: 18px;
+        }
+
+        * { box-sizing: border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue";
+            color: var(--text);
+            background: radial-gradient(900px 500px at 20% 10%, var(--blue), transparent 60%),
+                        radial-gradient(900px 500px at 80% 0%, rgba(255,255,255,0.9), transparent 60%),
+                        var(--bg);
+        }
+
+        .wrap{
+            max-width: 980px;
+            margin: 40px auto;
+            padding: 0 16px 40px;
+        }
+
+        .topbar{
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .crumbs a{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            text-decoration:none;
+            color: var(--text);
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.7);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            backdrop-filter: blur(6px);
+        }
+        .crumbs a:hover{ background: rgba(255,255,255,0.95); }
+
+        .header{
+            border: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.75));
+            box-shadow: var(--shadow);
+            border-radius: var(--radius);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header:before{
+            content:"";
+            position:absolute;
+            inset:-80px -120px auto auto;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle at 30% 30%, var(--blue2), transparent 60%);
+            transform: rotate(12deg);
+        }
+
+        .title{
+            margin: 0 0 8px;
+            font-size: 28px;
+            letter-spacing: -0.02em;
+        }
+        .subtitle{
+            margin:0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .grid{
+            margin-top: 16px;
+            display:grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 860px){
+            .grid{ grid-template-columns: 1fr; }
+        }
+
+        .card{
+            border: 1px solid var(--border);
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 18px;
+        }
+
+        .cardTitle{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin: 0 0 12px;
+            font-size: 16px;
+            letter-spacing: 0.02em;
+        }
+
+        .badge{
+            padding: 6px 10px;
+            background: var(--blue);
+            border: 1px solid rgba(31,41,55,0.08);
+            border-radius: 999px;
+            font-size: 12px;
+            color: #1f3b63;
+            white-space: nowrap;
+        }
+
+        .infoRow{
+            display:flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px dashed rgba(31,41,55,0.12);
+        }
+        .infoRow:last-child{ border-bottom: 0; padding-bottom: 0; }
+        .k{ color: var(--muted); min-width: 160px; }
+        .v{ font-weight: 600; text-align: right; }
+
+        .pillList{
+            display:flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .pill{
+            padding: 8px 10px;
+            background: rgba(215,236,255,0.55);
+            border: 1px solid rgba(31,41,55,0.10);
+            border-radius: 999px;
+            font-size: 13px;
+        }
+
+        .expList{
+            margin: 10px 0 0;
+            padding-left: 18px;
+            line-height: 1.6;
+        }
+        .expList li{ margin: 8px 0; }
+
+        .note{
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(246,242,234,0.8);
+            border: 1px solid rgba(31,41,55,0.10);
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .footer{
+            margin-top: 14px;
+            display:flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn{
+            display:inline-flex;
+            align-items:center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(31,41,55,0.14);
+            background: rgba(255,255,255,0.9);
+            text-decoration:none;
+            color: var(--text);
+        }
+        .btn:hover{ background: #fff; }
+        .btnBlue{
+            background: rgba(215,236,255,0.75);
+            border-color: rgba(31,41,55,0.10);
+        }
+        .btnBlue:hover{ background: rgba(215,236,255,0.95); }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+
+    <div class="topbar">
+        <div class="crumbs">
+            <a th:href="@{/}">← На главную</a>
+        </div>
+
+
+    </div>
+
+    <section class="header">
+        <h1 class="title">Об авторе</h1>
+        <p class="subtitle" th:text="${projectSummary}">
+            Краткое описание проекта.
+        </p>
+    </section>
+
+    <div class="grid">
+        <section class="card">
+            <h2 class="cardTitle">
+                Основная информация
+            </h2>
+
+            <div class="infoRow">
+                <div class="k">Автор</div>
+                <div class="v" th:text="${fullName}">ФИО</div>
+            </div>
+            <div class="infoRow">
+                <div class="k">Группа</div>
+                <div class="v" th:text="${group}">Группа</div>
+            </div>
+            <div class="infoRow">
+                <div class="k">Учебное заведение</div>
+                <div class="v" th:text="${university}">ВУЗ</div>
+            </div>
+            <div class="infoRow">
+                <div class="k">Контакты</div>
+                <div class="v">
+                    <span th:text="${email}">email</span>
+                </div>
+            </div>
+
+            <!-- небольшое описание автора -->
+            <div class="note" style="margin-top:12px;">
+                <strong>Обо мне:</strong><br/>
+                <span th:text="${authorNote}">Небольшой текст о себе</span>
+            </div>
+
+            <div class="note">
+                <strong>Сроки выполнения проекта:</strong>
+                начало —
+                <span th:text="${#temporals.format(startDate, 'dd.MM.yyyy')}">01.10.2025</span>,
+                завершение —
+                <span th:text="${#temporals.format(endDate, 'dd.MM.yyyy')}">11.12.2025</span>.
+            </div>
+
+            <div class="footer">
+                <a class="btn btnBlue" th:href="@{/stats}">📈 Статистика</a>
+                <a class="btn" th:href="@{/clients}">👤 Клиенты</a>
+                <a class="btn" th:href="@{/programs}">🧾 Программы</a>
+                <a class="btn" th:href="@{/policies}">📄 Полисы</a>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="cardTitle">
+                Технологии <span class="badge">стек</span>
+            </h2>
+
+            <div class="pillList">
+                <span class="pill">Java 17</span>
+                <span class="pill">Spring Boot</span>
+                <span class="pill">Spring Security</span>
+                <span class="pill">Spring Data JPA</span>
+                <span class="pill">Hibernate</span>
+                <span class="pill">Thymeleaf</span>
+                <span class="pill">MySQL</span>
+            </div>
+
+            <div class="note" style="margin-top:12px;">
+                <strong>Использованный стек:</strong>
+                <span th:text="${techStack}">...</span>
+            </div>
+
+            <h2 class="cardTitle" style="margin-top:16px;">
+                Краткое описание опыта
+            </h2>
+
+            <ul class="expList">
+                <li th:each="p : ${experiencePoints}" th:text="${p}">Пункт опыта</li>
+            </ul>
+        </section>
+    </div>
+
+</div>
+
+</body>
+</html>

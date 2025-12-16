@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ошибка 500 — внутренняя ошибка сервера</title>
+
+    <style>
+        :root{
+            --bg: #F6F0E6;
+            --card: #FFFFFF;
+            --ink: #1F2933;
+            --muted: #6B7280;
+            --blue: #11A6B7;
+            --blue-2:#0B8EA0;
+            --line: rgba(31,42,55,.10);
+            --shadow-soft: 0 18px 40px rgba(15,23,42,.18);
+            --r: 18px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body{
+            margin:0;
+            min-height:100vh;
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                var(--bg);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding: 24px 12px;
+        }
+
+        .card{
+            width: 100%;
+            max-width: 620px;
+            background: rgba(255,255,255,0.96);
+            border-radius: var(--r);
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow-soft);
+            padding: 28px 26px 22px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before{
+            content:"";
+            position:absolute;
+            inset: -80px -60px auto auto;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(17,166,183,.26), transparent 60%);
+            opacity: .9;
+        }
+
+        .badge{
+            display:inline-flex;
+            align-items:center;
+            gap: 10px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(17,166,183,.20);
+            background: #F9FAFB;
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .badge span.code{
+            font-weight: 700;
+            color: var(--blue-2);
+        }
+
+        .icon-wrap{
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--blue), rgba(17,166,183,.6));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#fff;
+            font-size: 28px;
+            box-shadow: 0 16px 30px rgba(17,166,183,.35);
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1{
+            margin: 0 0 6px;
+            font-size: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle{
+            margin: 0 0 16px;
+            font-size: 14px;
+            color: var(--muted);
+            max-width: 40rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        ul.hint{
+            margin: 0 0 18px 0;
+            padding-left: 20px;
+            font-size: 13px;
+            color: var(--muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        .actions{
+            display:flex;
+            flex-wrap:wrap;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary,
+        .btn-ghost{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+            text-decoration:none;
+            cursor:pointer;
+            white-space: nowrap;
+        }
+
+        .btn-primary{
+            background: linear-gradient(135deg, var(--blue), var(--blue-2));
+            color:#fff;
+            border:none;
+            box-shadow: 0 12px 26px rgba(17,166,183,.40);
+        }
+        .btn-primary:hover{
+            transform: translateY(-1px);
+            box-shadow: 0 16px 32px rgba(17,166,183,.45);
+        }
+
+        .btn-ghost{
+            background: rgba(255,255,255,.9);
+            border: 1px solid rgba(148,163,184,.6);
+            color: var(--muted);
+        }
+        .btn-ghost:hover{
+            background:#F9FAFB;
+        }
+
+        .tech{
+            margin-top: 10px;
+            font-size: 11px;
+            color:#9CA3AF;
+            position: relative;
+            z-index: 1;
+        }
+        .tech span{
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        @media (max-width: 480px){
+            .card{
+                padding: 22px 18px 18px;
+            }
+            h1{ font-size: 20px; }
+            .subtitle{ font-size: 13px; }
+        }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="badge">
+        <span class="code">500</span>
+        <span>Внутренняя ошибка сервера</span>
+    </div>
+
+    <div class="icon-wrap">⚙️</div>
+
+    <h1>Что-то сломалось на стороне сервера</h1>
+
+    <p class="subtitle">
+        Возникла непредвиденная ошибка при обработке запроса.
+        Мы уже записали её в журнал — администратор сможет разобраться, что пошло не так.
+    </p>
+
+    <ul class="hint">
+        <li>обновите страницу через несколько секунд;</li>
+        <li>если ошибка повторяется — вернитесь в личный кабинет и попробуйте другой раздел;</li>
+        <li>при обращении к администратору укажите время ошибки и адрес страницы.</li>
+    </ul>
+
+    <div class="actions">
+        <a class="btn-primary" th:href="@{/}">
+            ← На главную
+        </a>
+
+        <a class="btn-ghost" href="javascript:history.back();">
+            Назад
+        </a>
+    </div>
+
+
+</div>
+
+</body>
+</html>

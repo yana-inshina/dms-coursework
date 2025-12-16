@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Новая корпоративная заявка</title>
+
+    <style>
+        :root{
+            --bg:#F6F0E6;
+            --card:#FFFFFF;
+            --ink:#1F2A37;
+            --muted:#6B7280;
+            --line:rgba(31,42,55,.10);
+            --blue:#11A6B7;
+            --blue-2:#0B8EA0;
+            --beige-2:#FFF8EE;
+            --shadow-soft:0 10px 24px rgba(31,42,55,.08);
+            --shadow:0 10px 30px rgba(17,166,183,.12);
+            --r:18px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--ink);
+            /* Отказываемся от фиксированного фона и минимальной высоты, как в форме индивидуальной заявки */
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+        .wrap{ max-width:1200px; margin:0 auto; padding:26px 16px 44px; }
+
+        .topbar{
+            background:rgba(255,255,255,.72);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:14px 16px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            box-shadow:var(--shadow-soft);
+            backdrop-filter:blur(8px);
+            flex-wrap:wrap;
+        }
+        .brand{ display:flex; align-items:center; gap:10px; min-width:260px; }
+        .logo{
+            width:42px; height:42px; border-radius:14px;
+            background:linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+            box-shadow:0 10px 22px rgba(17,166,183,.22);
+        }
+        .brand h1{ margin:0; font-size:18px; }
+        .brand p{ margin:2px 0 0; font-size:12px; color:var(--muted); }
+
+        .link-btn{
+            border-radius:12px;
+            padding:10px 12px;
+            font-weight:900;
+            border:1px solid rgba(17,166,183,.35);
+            background:#fff;
+            color:var(--blue-2);
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+        }
+        .spacer{ flex:1; }
+
+        .hero{
+            margin-top:14px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:18px;
+            box-shadow:var(--shadow-soft);
+            /* Прижимаем фон и добавляем декоративный элемент, как в форме инд. заявки */
+            position:relative;
+            overflow:hidden;
+        }
+        .hero:before{
+            content:"";
+            position:absolute;
+            inset:-60px -90px auto auto;
+            width:240px;
+            height:240px;
+            border-radius:50%;
+            background:radial-gradient(circle at 30% 30%, rgba(17,166,183,.28), transparent 60%);
+            transform:rotate(12deg);
+        }
+        .hero h2{ margin:0 0 6px; }
+        .hero p{ margin:0; color:var(--muted); }
+
+        .form-card{
+            margin-top:14px;
+            /* приводим ширину к 760px, как в форме индивидуальной заявки */
+            max-width:760px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:18px;
+            box-shadow:var(--shadow-soft);
+        }
+        .form-grid{ display:flex; flex-direction:column; gap:14px; }
+        .field{ display:flex; flex-direction:column; gap:6px; }
+        .field label{ font-size:13px; color:var(--muted); }
+
+        input[type="number"],
+        textarea,
+        select{
+            padding:10px 12px;
+            border-radius:12px;
+            border:1px solid rgba(31,42,55,.18);
+            background:#fff;
+            font-size:14px;
+        }
+        textarea{ min-height:80px; resize:vertical; }
+
+        /* добавляем фокусные эффекты, как в форме индивидуальной заявки */
+        input:focus,
+        textarea:focus,
+        select:focus{
+            border-color:var(--blue);
+            box-shadow:0 0 0 1px rgba(17,166,183,.35);
+        }
+
+        .actions-row{ margin-top:8px; display:flex; gap:10px; flex-wrap:wrap; }
+        .btn{
+            border-radius:12px;
+            padding:9px 14px;
+            font-weight:900;
+            border:1px solid rgba(31,42,55,.14);
+            background:#fff;
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+        }
+        .btn-primary{
+            border-color:rgba(17,166,183,.35);
+            color:var(--blue-2);
+        }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo"></div>
+            <div>
+                <h1 th:text="${title}">Новая корпоративная заявка</h1>
+                <p>Организации и групповые расчёты</p>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <a class="link-btn" th:href="@{/corporate-applications}">
+            ← К списку корпоративных заявок
+        </a>
+
+        <a class="link-btn" th:href="@{/}">
+            На главную
+        </a>
+    </div>
+
+    <div class="hero">
+        <h2>Параметры корпоративной заявки</h2>
+        <p>Выберите организацию и программу, затем укажите количество сотрудников.</p>
+    </div>
+
+    <div class="form-card">
+        <form class="form-grid"
+              th:action="@{/corporate-applications/save}"
+              th:object="${item}"
+              method="post">
+
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="field">
+                <label for="client">Организация</label>
+                <select id="client" th:field="*{corporateClient}">
+                    <!-- проверяем, пустой ли список corpClients -->
+                    <option value="" disabled
+                            th:if="${#lists.isEmpty(corpClients)}">
+                        Нет организаций
+                    </option>
+
+                    <!-- сами организации -->
+                    <option th:each="c : ${corpClients}"
+                            th:value="${c.id}"
+                            th:text="${c.name + ' (ИНН ' + c.inn + ')'}">
+                        ООО «Здоровье Плюс» (ИНН 7701001001)
+                    </option>
+                </select>
+            </div>
+
+
+
+            <div class="field">
+                <label for="program">Программа ДМС</label>
+                <select id="program" th:field="*{program}">
+                    <option th:each="p : ${programs}"
+                            th:value="${p.id}"
+                            th:text="${p.name}">
+                        Программа
+                    </option>
+                </select>
+            </div>
+
+            <!-- Удалён выбор тарифного плана. Тарифный план будет подставлен автоматически на сервере. -->
+
+            <div class="field">
+                <label for="region">Регион обслуживания</label>
+                <select id="region" th:field="*{serviceRegion}">
+                    <option th:each="r : ${regions}"
+                            th:value="${r.id}"
+                            th:text="${r.name}">
+                        Регион
+                    </option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="headcount">Количество сотрудников (headcount)</label>
+                <input id="headcount" type="number" min="1" th:field="*{headcount}">
+            </div>
+
+            <div class="field">
+                <label for="avgAge">Средний возраст (по желанию)</label>
+                <input id="avgAge" type="number" min="18" th:field="*{averageAge}">
+            </div>
+
+            <div class="field">
+                <label for="comment">Комментарий</label>
+                <textarea id="comment"
+                          th:field="*{comment}"
+                          placeholder="Особые условия, пожелания по программе..."></textarea>
+            </div>
+
+            <div class="actions-row">
+                <button class="btn btn-primary" type="submit">
+                    ➜ Сохранить заявку
+                </button>
+                <a class="btn" th:href="@{/corporate-applications}">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

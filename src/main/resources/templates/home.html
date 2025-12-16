@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Личный кабинет</title>
+
+    <style>
+        :root{
+            --bg: #F6F0E6;          /* бежевый фон */
+            --card: #FFFFFF;        /* белые карточки */
+            --ink: #1F2A37;         /* основной текст */
+            --muted: #6B7280;       /* вторичный текст */
+            --line: rgba(31,42,55,.10);
+            --blue: #11A6B7;        /* голубой акцент */
+            --blue-2:#0B8EA0;       /* темнее для hover */
+            --beige-2:#FFF8EE;      /* светлая плашка */
+            --shadow: 0 10px 30px rgba(17,166,183,.12);
+            --shadow-soft: 0 10px 24px rgba(31,42,55,.08);
+            --r: 18px;
+        }
+
+        *{ box-sizing: border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--ink);
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+
+        .wrap{ max-width: 1100px; margin: 0 auto; padding: 26px 16px 40px; }
+
+        /* Верхняя панель */
+        .topbar{
+            background: rgba(255,255,255,.70);
+            border: 1px solid var(--line);
+            border-radius: var(--r);
+            padding: 16px 16px;
+            display:flex;
+            align-items:center;
+            gap: 12px;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow-soft);
+        }
+        .brand{
+            display:flex; align-items:center; gap:10px;
+            min-width: 220px;
+        }
+        .logo{
+            width: 42px; height: 42px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+            box-shadow: 0 10px 22px rgba(17,166,183,.22);
+        }
+        .brand h1{ margin:0; font-size: 18px; line-height: 1.15; }
+        .brand p{ margin:2px 0 0; font-size: 12px; color: var(--muted); }
+
+        .chips{ display:flex; flex-wrap: wrap; gap: 8px; align-items:center; }
+        .chip{
+            display:inline-flex; align-items:center; gap:8px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: var(--beige-2);
+            border: 1px solid rgba(31,42,55,.10);
+            font-size: 13px;
+        }
+        .dot{ width:8px; height:8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(17,166,183,.12); }
+
+        .spacer{ flex: 1; }
+
+        .logout-btn{
+            border: 1px solid rgba(17,166,183,.35);
+            background: #fff;
+            color: var(--blue-2);
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor:pointer;
+            font-weight: 600;
+        }
+        .logout-btn:hover{ background: rgba(17,166,183,.06); border-color: rgba(17,166,183,.55); }
+
+        /* Hero — только приветственный блок */
+        .hero{
+            margin-top: 16px;
+        }
+
+        .hero-card{
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--r);
+            padding: 18px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-card:before{
+            content:"";
+            position:absolute; inset:-40px -80px auto auto;
+            width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(17,166,183,.28), transparent 60%);
+            transform: rotate(12deg);
+        }
+        .hero-title{ margin:0; font-size: 22px; }
+        .hero-sub{ margin: 8px 0 0; color: var(--muted); max-width: 60ch; }
+
+        .pill-row{
+            margin-top: 12px;
+            display:flex; flex-wrap: wrap; gap: 10px;
+        }
+        .pill{
+            display:inline-flex; align-items:center; gap:10px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: var(--beige-2);
+            border: 1px solid rgba(31,42,55,.10);
+            line-height: 1.2;
+            font-size: 13px;
+        }
+        .pill b{ font-weight: 700; }
+        .pill .mini{
+            width: 26px; height: 26px;
+            border-radius: 10px;
+            display:grid; place-items:center;
+            color: #fff;
+            background: linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+        }
+
+        /* Разделы */
+        .section-title{ margin: 18px 0 10px; font-size: 16px; color: #111827; }
+        .grid{
+            display:grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 12px;
+        }
+        .card{
+            grid-column: span 4;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--r);
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
+        }
+        @media (max-width: 900px){ .card{ grid-column: span 6; } }
+        @media (max-width: 560px){ .card{ grid-column: span 12; } }
+
+        .card h3{ margin:0 0 8px; font-size: 15px; }
+        .card p{ margin:0 0 10px; color: var(--muted); font-size: 13px; }
+
+        .links{ display:grid; gap: 8px; }
+        .links a{
+            text-decoration:none;
+            color: var(--ink);
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(31,42,55,.10);
+            background: var(--beige-2);
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .links a:hover{ border-color: rgba(17,166,183,.35); background: rgba(17,166,183,.06); }
+        .links a .right{ color: var(--blue-2); font-weight: 800; }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <!-- Верхняя панель -->
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo" aria-hidden="true"></div>
+            <div>
+                <!-- Обновлённое название системы по ТЗ -->
+                <h1>Информационно-справочная система медицинского страхования</h1>
+                <p>Личный кабинет</p>
+            </div>
+        </div>
+
+        <div class="chips">
+            <div class="chip">
+                <span class="dot" aria-hidden="true"></span>
+                Пользователь: <b sec:authentication="name">username</b>
+            </div>
+            <div class="chip">
+                Роль:
+                <span th:each="a,iter : ${#authentication.authorities}">
+                  <b th:text="${a.authority == 'ROLE_ADMIN' ? 'Администратор' :
+                               a.authority == 'ROLE_MANAGER' ? 'Менеджер' :
+                               a.authority == 'ROLE_INDIVIDUAL' ? 'Физ. лицо' :
+                               a.authority == 'ROLE_CORPORATE' ? 'Корп. клиент' :
+                               #strings.replace(a.authority,'ROLE_','')}">Роль</b>
+                  <span th:if="${!iter.last}">, </span>
+                </span>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <!-- Выход (POST + CSRF) -->
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button class="logout-btn" type="submit">Выйти</button>
+        </form>
+    </div>
+
+    <!-- Hero - только приветствие -->
+    <div class="hero">
+        <div class="hero-card">
+            <h2 class="hero-title">Добро пожаловать 👋</h2>
+            <p class="hero-sub">
+                Здесь можно работать с клиентами, программами и полисами ДМС, а также смотреть статистику.
+                Для администраторов доступна панель управления пользователями.
+            </p>
+
+            <div class="pill-row">
+                <div class="pill">
+                    <span class="mini">✓</span>
+                    <div><b>Поиск</b><br/>по спискам клиентов/программ/полисов</div>
+                </div>
+                <div class="pill">
+                    <span class="mini">↕</span>
+                    <div><b>Сортировка</b><br/>по полям таблиц</div>
+                </div>
+                <div class="pill">
+                    <span class="mini">⚙</span>
+                    <div><b>Права</b><br/>доступ по ролям</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Разделы -->
+    <h3 class="section-title">Разделы системы</h3>
+    <div class="grid">
+
+        <!-- КЛИЕНТЫ: только MANAGER -->
+        <div class="card" sec:authorize="hasRole('MANAGER')">
+            <h3>Клиенты</h3>
+            <p>Просмотр и управление клиентами.</p>
+            <div class="links">
+                <a th:href="@{/clients}"><span>Открыть список</span><span class="right">→</span></a>
+                <a th:href="@{/clients/new}">
+                    <span>Добавить клиента</span><span class="right">＋</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- ПРОГРАММЫ: каталог для INDIVIDUAL/CORPORATE и рабочий инструмент для MANAGER -->
+        <div class="card" sec:authorize="hasAnyRole('INDIVIDUAL','CORPORATE','MANAGER')">
+            <h3>Страховые программы</h3>
+            <p>Каталог программ ДМС.</p>
+            <div class="links">
+                <a th:href="@{/programs}">
+                    <span>Открыть каталог программ</span><span class="right">→</span>
+                </a>
+                <!-- Добавление программ — только менеджер -->
+                <a th:href="@{/programs/new}" sec:authorize="hasRole('MANAGER')">
+                    <span>Добавить программу</span><span class="right">＋</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- ПОЛИСЫ: только MANAGER -->
+        <div class="card" sec:authorize="hasRole('MANAGER')">
+            <h3>Полисы ДМС</h3>
+            <p>Оформление, редактирование, статусы.</p>
+            <div class="links">
+                <a th:href="@{/policies}"><span>Открыть список</span><span class="right">→</span></a>
+                <a th:href="@{/policies/new}">
+                    <span>Оформить полис</span><span class="right">＋</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- СТАТИСТИКА: менеджер и админ (нейтральный раздел) -->
+        <div class="card" sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+            <h3>Статистика</h3>
+            <p>Средняя премия, активные программы и т.п.</p>
+            <div class="links">
+                <a th:href="@{/stats}"><span>Перейти</span><span class="right">→</span></a>
+            </div>
+        </div>
+
+        <!-- ОБ АВТОРЕ: доступно всем -->
+        <div class="card">
+            <h3>Об авторе</h3>
+            <p>Краткая информация о разработчике и проекте.</p>
+            <div class="links">
+                <a th:href="@{/about}"><span>Открыть</span><span class="right">→</span></a>
+            </div>
+        </div>
+
+        <!-- АДМИНКА: только ADMIN -->
+        <div class="card" sec:authorize="hasRole('ADMIN')">
+            <h3>Админка</h3>
+            <p>Роли и включение/отключение пользователей.</p>
+            <div class="links">
+                <a th:href="@{/admin/users}"><span>Пользователи</span><span class="right">→</span></a>
+            </div>
+        </div>
+
+        <!-- СПРАВОЧНИКИ: доступны всем пользователям для просмотра (редактирование ограничено шаблонами) -->
+        <div class="card">
+            <h3>Справочники</h3>
+            <!-- Список доступных справочников. Убрали упоминание тарифов, поскольку тарифные планы больше не используются -->
+            <p>Покрытия, исключения, акции, регионы и медорганизации.</p>
+            <div class="links">
+                <a th:href="@{/coverages}"><span>Покрытия</span><span class="right">→</span></a>
+                <a th:href="@{/exclusions}"><span>Исключения</span><span class="right">→</span></a>
+                <!-- Ссылка на тарифные планы удалена, так как функциональность тарифов убрана из проекта -->
+                <a th:href="@{/promo-offers}"><span>Акции и скидки</span><span class="right">→</span></a>
+                <a th:href="@{/regions}"><span>Регионы</span><span class="right">→</span></a>
+                <a th:href="@{/medical-orgs}"><span>Медорганизации</span><span class="right">→</span></a>
+            </div>
+        </div>
+
+        <!-- ИНДИВИДУАЛЬНЫЕ ЗАЯВКИ:
+             INDIVIDUAL — свои заявки + оставить заявку
+             MANAGER    — список для обработки (кнопка "оставить" не нужна) -->
+        <div class="card" sec:authorize="hasAnyRole('INDIVIDUAL','MANAGER')">
+            <h3>Индивидуальные заявки на ДМС</h3>
+            <p>Оставленные заявки на программы и расчёт премии.</p>
+            <div class="links">
+                <a th:href="@{/applications}">
+                    <span th:text="${#authorization.expression('hasRole(''INDIVIDUAL'')') ? 'Мои индивидуальные заявки' : 'Все индивидуальные заявки'}">
+                        Открыть список индивидуальных заявок
+                    </span>
+                    <span class="right">→</span>
+                </a>
+                <!-- Оставить заявку — только физлицо -->
+                <a th:href="@{/programs}" sec:authorize="hasRole('INDIVIDUAL')">
+                    <span>Оставить заявку (через каталог программ)</span><span class="right">＋</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- КОРПОРАТИВНЫЕ ЗАЯВКИ:
+             CORPORATE — свои заявки + создать новую
+             MANAGER   — список для обработки -->
+        <div class="card" sec:authorize="hasAnyRole('MANAGER','CORPORATE')">
+            <h3>Корпоративные заявки на ДМС</h3>
+            <p>Просмотр и обработка заявок от организаций, выпуск групповых полисов.</p>
+            <div class="links">
+                <a th:href="@{/corporate-applications}">
+                    <span th:text="${#authorization.expression('hasRole(''CORPORATE'')') ? 'Мои корпоративные заявки' : 'Все корпоративные заявки'}">
+                        Открыть список корпоративных заявок
+                    </span>
+                    <span class="right">→</span>
+                </a>
+                <!-- Создание новой заявки — только корпклиент -->
+                <a th:href="@{/corporate-applications/new}" sec:authorize="hasRole('CORPORATE')">
+                    <span>Оставить корпоративную заявку</span><span class="right">＋</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- МОЯ ОРГАНИЗАЦИЯ: доступно корпоративным пользователям -->
+        <div class="card" sec:authorize="hasRole('CORPORATE')">
+            <h3>Организация</h3>
+            <p>Создайте или отредактируйте карточку вашей организации для подачи корпоративных заявок.</p>
+            <div class="links">
+                <a th:href="@{/my-org/edit}">
+                    <span>Моя организация</span><span class="right">→</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

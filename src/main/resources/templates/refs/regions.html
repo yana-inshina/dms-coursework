@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Регионы</title>
+
+    <!-- тот же CSS, что у других справочников -->
+    <style>
+        :root{
+            --bg:#F6F0E6;
+            --card:#FFFFFF;
+            --ink:#1F2A37;
+            --muted:#6B7280;
+            --line:rgba(31,42,55,.10);
+            --blue:#11A6B7;
+            --blue-2:#0B8EA0;
+            --beige-2:#FFF8EE;
+            --shadow-soft:0 10px 24px rgba(31,42,55,.08);
+            --shadow:0 10px 30px rgba(17,166,183,.12);
+            --r:18px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--ink);
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+        .wrap{ max-width:1200px; margin:0 auto; padding:26px 16px 44px; }
+
+        .topbar{
+            background:rgba(255,255,255,.72);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:14px 16px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            box-shadow:var(--shadow-soft);
+            backdrop-filter:blur(8px);
+            flex-wrap:wrap;
+        }
+        .brand{
+            display:flex; align-items:center; gap:10px;
+            min-width:260px;
+        }
+        .logo{
+            width:42px; height:42px; border-radius:14px;
+            background:linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+            box-shadow:0 10px 22px rgba(17,166,183,.22);
+        }
+        .brand h1{ margin:0; font-size:18px; line-height:1.15; }
+        .brand p{ margin:2px 0 0; font-size:12px; color:var(--muted); }
+
+        .chip{
+            display:inline-flex; align-items:center; gap:8px;
+            padding:8px 10px;
+            border-radius:999px;
+            background:var(--beige-2);
+            border:1px solid rgba(31,42,55,.10);
+            font-size:13px;
+            white-space:nowrap;
+        }
+        .dot{
+            width:8px; height:8px; border-radius:50%;
+            background:var(--blue);
+            box-shadow:0 0 0 4px rgba(17,166,183,.12);
+        }
+        .spacer{ flex:1; }
+
+        .link-btn{
+            border-radius:12px;
+            padding:10px 12px;
+            font-weight:900;
+            border:1px solid rgba(17,166,183,.35);
+            background:#fff;
+            color:var(--blue-2);
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            white-space:nowrap;
+        }
+        .link-btn:hover{
+            background:rgba(17,166,183,.06);
+            border-color:rgba(17,166,183,.55);
+        }
+
+        .hero{
+            margin-top:14px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:18px;
+            box-shadow:var(--shadow-soft);
+            position:relative;
+            overflow:hidden;
+        }
+        .hero:before{
+            content:"";
+            position:absolute; inset:-60px -90px auto auto;
+            width:240px; height:240px; border-radius:50%;
+            background:radial-gradient(circle at 30% 30%, rgba(17,166,183,.28), transparent 60%);
+            transform:rotate(12deg);
+        }
+        .hero h2{ margin:0; font-size:20px; }
+        .hero p{ margin:8px 0 0; color:var(--muted); max-width:90ch; }
+
+        .toolbar{
+            margin-top:12px;
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            align-items:center;
+        }
+        .search{
+            flex:1;
+            min-width:260px;
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            align-items:center;
+            background:rgba(255,255,255,.72);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:12px;
+            box-shadow:var(--shadow);
+        }
+        .field{
+            display:flex; flex-direction:column; gap:6px;
+            flex:1; min-width:220px;
+        }
+        .field label{ font-size:12px; color:var(--muted); }
+        input[type="text"]{
+            padding:10px 12px;
+            border-radius:12px;
+            border:1px solid rgba(31,42,55,.18);
+            background:#fff;
+            outline:none;
+            font-weight:700;
+        }
+        input[type="text"]:focus{
+            border-color:rgba(17,166,183,.55);
+            box-shadow:0 0 0 4px rgba(17,166,183,.12);
+        }
+
+        .btn{
+            border-radius:12px;
+            padding:9px 12px;
+            font-weight:900;
+            border:1px solid rgba(31,42,55,.14);
+            background:#fff;
+            cursor:pointer;
+            text-decoration:none;
+            white-space:nowrap;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+        }
+        .btn:hover{
+            background:rgba(17,166,183,.06);
+            border-color:rgba(17,166,183,.40);
+        }
+        .btn-primary{
+            border-color:rgba(17,166,183,.35);
+            color:var(--blue-2);
+        }
+        .btn-danger{
+            border-color:rgba(239,68,68,.35);
+            color:#b91c1c;
+        }
+        .btn-danger:hover{
+            background:rgba(239,68,68,.06);
+            border-color:rgba(239,68,68,.55);
+        }
+
+        .table-card{
+            margin-top:12px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            box-shadow:var(--shadow-soft);
+            overflow:hidden;
+        }
+        .table-head{
+            padding:12px 16px;
+            border-bottom:1px solid var(--line);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            background:rgba(255,255,255,.60);
+            flex-wrap:wrap;
+        }
+        .hint{ color:var(--muted); font-size:13px; }
+
+        .table-wrap{ overflow:auto; }
+        table{
+            width:100%;
+            border-collapse:collapse;
+            min-width:840px;
+        }
+        thead th{
+            text-align:left;
+            font-size:12px;
+            letter-spacing:.03em;
+            text-transform:uppercase;
+            color:#111827;
+            background:rgba(255,248,238,.85);
+            border-bottom:1px solid var(--line);
+            padding:12px 12px;
+            white-space:nowrap;
+        }
+        tbody td{
+            padding:12px 12px;
+            border-bottom:1px solid rgba(31,42,55,.08);
+            vertical-align:top;
+        }
+        tbody tr:hover{ background:rgba(17,166,183,.05); }
+
+        .muted{ color:var(--muted); font-size:13px; }
+        .mono{ font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1; }
+
+        .tag{
+            display:inline-flex;
+            align-items:center;
+            padding:6px 10px;
+            border-radius:999px;
+            border:1px solid rgba(31,42,55,.12);
+            font-size:12px;
+            font-weight:800;
+            white-space:nowrap;
+        }
+        .tag-on{
+            border-color:rgba(34,197,94,.45);
+            color:#166534;
+            background:rgba(34,197,94,.06);
+        }
+        .tag-off{
+            border-color:rgba(239,68,68,.45);
+            color:#991b1b;
+            background:rgba(239,68,68,.04);
+        }
+
+        .actions-cell{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            align-items:center;
+        }
+        .empty{
+            padding:16px;
+            color:var(--muted);
+        }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo" aria-hidden="true"></div>
+            <div>
+                <h1 th:text="${title}">Регионы</h1>
+                <p>Справочник регионов действия полисов ДМС.</p>
+            </div>
+        </div>
+
+        <div class="chip">
+            <span class="dot" aria-hidden="true"></span>
+            Пользователь: <b sec:authentication="name">username</b>
+        </div>
+
+        <div class="spacer"></div>
+
+        <a class="link-btn" th:href="@{/}">
+            ← На главную
+        </a>
+    </div>
+
+    <div class="hero">
+        <h2 th:text="${title}">Регионы</h2>
+        <p>
+            Настраивайте регионы обслуживания: города, области, федеральные округа.
+            Эти данные используются при выпуске полисов и настройке программ.
+        </p>
+    </div>
+
+    <form class="toolbar" th:action="@{/regions}" method="get">
+        <div class="search">
+            <div class="field">
+                <label for="keyword">Поиск по названию</label>
+                <input id="keyword"
+                       type="text"
+                       name="keyword"
+                       placeholder="Например: Москва"
+                       th:value="${keyword}">
+            </div>
+
+            <button class="btn" type="submit">Искать</button>
+            <a class="btn" th:href="@{/regions}">Сбросить</a>
+        </div>
+
+        <div sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+            <a class="btn btn-primary" th:href="@{/regions/new}">
+                ＋ Добавить регион
+            </a>
+        </div>
+    </form>
+
+    <div class="table-card">
+        <div class="table-head">
+            <div class="hint">
+                Найдено записей: <b th:text="${#lists.size(items)}">0</b>
+            </div>
+            <div class="hint" sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+                Редактирование и удаление доступны ролям MANAGER / ADMIN
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width:70px;">ID</th>
+                    <th>Название</th>
+                    <th>Описание</th>
+                    <th style="width:90px;">Коэфф.</th>
+                    <th style="width:130px;">Статус</th>
+                    <th style="width:220px;">Действия</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="r : ${items}">
+                    <td class="mono" th:text="${r.id}">1</td>
+                    <td th:text="${r.name}">Москва</td>
+                    <td class="muted" th:text="${r.description}">
+                        Москва и Московская область
+                    </td>
+                    <td class="mono" th:text="${r.coefficient != null ? r.coefficient : 1}">1.00</td>
+                    <td>
+                        <span class="tag"
+                              th:classappend="${r.active} ? ' tag-on' : ' tag-off'"
+                              th:text="${r.active} ? 'Активен' : 'Не активен'">
+                            Активен
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions-cell" sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+                            <a class="btn btn-primary"
+                               th:href="@{/regions/{id}/edit(id=${r.id})}">
+                                ✏️ Редактировать
+                            </a>
+
+                            <form th:action="@{/regions/{id}/delete(id=${r.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Удалить регион из справочника?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button class="btn btn-danger" type="submit">🗑 Удалить</button>
+                            </form>
+                        </div>
+                        <span class="muted" sec:authorize="!hasAnyRole('MANAGER','ADMIN')">—</span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(items)}">
+                    <td class="empty" colspan="6">Записи не найдены.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

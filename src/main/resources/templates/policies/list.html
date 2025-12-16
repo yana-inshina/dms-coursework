@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Полисы ДМС</title>
+
+    <style>
+        :root{
+          --bg: #F6F0E6;
+          --card: #FFFFFF;
+          --ink: #1F2A37;
+          --muted: #6B7280;
+          --line: rgba(31,42,55,.10);
+          --blue: #11A6B7;
+          --blue-2:#0B8EA0;
+          --beige-2:#FFF8EE;
+          --shadow-soft: 0 10px 24px rgba(31,42,55,.08);
+          --shadow: 0 10px 30px rgba(17,166,183,.12);
+          --r: 18px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+          margin:0;
+          font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+          color: var(--ink);
+          background:
+            radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+            radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+            var(--bg);
+        }
+        .wrap{ max-width: 1200px; margin: 0 auto; padding: 26px 16px 44px; }
+
+        .topbar{
+          background: rgba(255,255,255,.72);
+          border: 1px solid var(--line);
+          border-radius: var(--r);
+          padding: 14px 16px;
+          display:flex;
+          align-items:center;
+          gap: 12px;
+          box-shadow: var(--shadow-soft);
+          backdrop-filter: blur(8px);
+          flex-wrap: wrap;
+        }
+        .brand{ display:flex; align-items:center; gap:10px; min-width: 240px; }
+        .logo{
+          width: 42px; height: 42px; border-radius: 14px;
+          background: linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+          box-shadow: 0 10px 22px rgba(17,166,183,.22);
+        }
+        .brand h1{ margin:0; font-size: 18px; line-height: 1.15; }
+        .brand p{ margin:2px 0 0; font-size: 12px; color: var(--muted); }
+
+        .spacer{ flex: 1; }
+
+        .chip{
+          display:inline-flex; align-items:center; gap:8px;
+          padding: 8px 10px;
+          border-radius: 999px;
+          background: var(--beige-2);
+          border: 1px solid rgba(31,42,55,.10);
+          font-size: 13px;
+          white-space: nowrap;
+        }
+        .dot{ width:8px; height:8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(17,166,183,.12); }
+
+        .btn, .link-btn{
+          border-radius: 12px;
+          padding: 10px 12px;
+          font-weight: 900;
+          border: 1px solid rgba(31,42,55,.14);
+          background: #fff;
+          color: var(--ink);
+          cursor:pointer;
+          text-decoration: none;
+          display:inline-flex;
+          align-items:center;
+          gap:8px;
+          white-space: nowrap;
+        }
+        .btn:hover, .link-btn:hover{ background: rgba(17,166,183,.06); border-color: rgba(17,166,183,.40); }
+        .btn-primary, .link-primary{
+          border-color: rgba(17,166,183,.35);
+          color: var(--blue-2);
+          background: #fff;
+        }
+        .btn-danger{
+          border-color: rgba(239,68,68,.35);
+          color: #b91c1c;
+          background: #fff;
+        }
+        .btn-danger:hover{
+          background: rgba(239,68,68,.06);
+          border-color: rgba(239,68,68,.55);
+        }
+
+        .hero{
+          margin-top: 14px;
+          background: var(--card);
+          border: 1px solid var(--line);
+          border-radius: var(--r);
+          padding: 18px;
+          box-shadow: var(--shadow-soft);
+          position: relative;
+          overflow:hidden;
+        }
+        .hero:before{
+          content:"";
+          position:absolute; inset:-60px -90px auto auto;
+          width: 240px; height: 240px; border-radius: 50%;
+          background: radial-gradient(circle at 30% 30%, rgba(17,166,183,.28), transparent 60%);
+          transform: rotate(12deg);
+        }
+        .hero h2{ margin:0; font-size: 20px; }
+        .hero p{ margin:8px 0 0; color: var(--muted); max-width: 90ch; }
+
+        .toolbar{
+          margin-top: 12px;
+          display:flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          align-items:center;
+        }
+        .search{
+          flex: 1;
+          min-width: 260px;
+          display:flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          align-items:center;
+          background: rgba(255,255,255,.72);
+          border: 1px solid var(--line);
+          border-radius: var(--r);
+          padding: 12px;
+          box-shadow: var(--shadow);
+        }
+        .field{
+          display:flex;
+          flex-direction: column;
+          gap: 6px;
+          flex: 1;
+          min-width: 220px;
+        }
+        .field label{ font-size: 12px; color: var(--muted); }
+        input[type="text"]{
+          padding: 10px 12px;
+          border-radius: 12px;
+          border: 1px solid rgba(31,42,55,.18);
+          background: #fff;
+          outline:none;
+          font-weight: 700;
+        }
+        input[type="text"]:focus{
+          border-color: rgba(17,166,183,.55);
+          box-shadow: 0 0 0 4px rgba(17,166,183,.12);
+        }
+
+        .table-card{
+          margin-top: 12px;
+          background: var(--card);
+          border: 1px solid var(--line);
+          border-radius: var(--r);
+          box-shadow: var(--shadow-soft);
+          overflow:hidden;
+        }
+        .table-head{
+          padding: 12px 16px;
+          border-bottom: 1px solid var(--line);
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap: 10px;
+          background: rgba(255,255,255,.60);
+        }
+        .table-head .hint{ color: var(--muted); font-size: 13px; }
+
+        .table-wrap{ overflow:auto; }
+        table{
+          width: 100%;
+          border-collapse: collapse;
+          min-width: 980px;
+        }
+        thead th{
+          text-align:left;
+          font-size: 12px;
+          letter-spacing: .03em;
+          text-transform: uppercase;
+          color: #111827;
+          background: rgba(255,248,238,.85);
+          border-bottom: 1px solid var(--line);
+          padding: 12px 12px;
+          white-space: nowrap;
+        }
+        tbody td{
+          padding: 12px 12px;
+          border-bottom: 1px solid rgba(31,42,55,.08);
+          vertical-align: top;
+        }
+        tbody tr:hover{ background: rgba(17,166,183,.05); }
+
+        .muted{ color: var(--muted); font-size: 13px; }
+        .mono{ font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+        .status{
+          display:inline-flex;
+          align-items:center;
+          gap: 8px;
+          font-weight: 900;
+          font-size: 12px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(31,42,55,.10);
+          background: var(--beige-2);
+          white-space: nowrap;
+        }
+        .led{ width: 8px; height: 8px; border-radius: 50%; background: #9CA3AF; box-shadow: 0 0 0 4px rgba(156,163,175,.14); }
+        .st-active .led{ background:#22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.12); }
+        .st-expired .led{ background:#f59e0b; box-shadow: 0 0 0 4px rgba(245,158,11,.12); }
+        .st-cancelled .led{ background:#ef4444; box-shadow: 0 0 0 4px rgba(239,68,68,.12); }
+
+        .actions{
+          display:flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          align-items:center;
+        }
+        .inline-form{ display:inline; margin:0; }
+
+        .empty{
+          padding: 16px;
+          color: var(--muted);
+        }
+
+        .sort-link{
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          text-decoration:none;
+          color:#111827;
+          font-weight:800;
+
+        .sort-ico{
+          width:22px; height:22px;
+          border-radius:10px;
+          display:grid; place-items:center;
+          background:rgba(17,166,183,.10);
+          border:1px solid rgba(17,166,183,.18);
+          color:var(--blue-2);
+          font-size:12px;
+        }
+
+        .sort-link:hover .sort-ico{
+          border-color: rgba(17,166,183,.55);
+          box-shadow: 0 0 0 3px rgba(17,166,183,.12);
+        }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <!-- Сообщение об ошибке удаления -->
+    <div th:if="${errorMessage}" style="margin-bottom: 12px;">
+        <div style="padding: 10px 14px; border-radius: 14px; background: rgba(239,68,68,.1); color:#991b1b; border:1px solid rgba(239,68,68,.25);">
+            <span th:text="${errorMessage}">Ошибка</span>
+        </div>
+    </div>
+
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo" aria-hidden="true"></div>
+            <div>
+                <h1>Полисы ДМС</h1>
+                <p>Поиск, просмотр и управление</p>
+            </div>
+        </div>
+
+        <div class="chip">
+            <span class="dot" aria-hidden="true"></span>
+            Пользователь: <b sec:authentication="name">username</b>
+        </div>
+
+        <div class="spacer"></div>
+
+        <a class="link-btn link-primary" th:href="@{/}">← На главную</a>
+
+        <span sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+          <a class="link-btn btn-primary" th:href="@{/policies/new}">＋ Оформить полис</a>
+        </span>
+    </div>
+
+    <div class="hero">
+        <h2>Список полисов</h2>
+        <p>
+            Используйте поиск, чтобы быстро найти полис по номеру, клиенту или программе.
+            Для сортировки нажмите на заголовок нужного столбца.
+        </p>
+    </div>
+
+    <!-- Поиск -->
+    <form class="toolbar" th:action="@{/policies}" method="get">
+        <div class="search">
+            <div class="field">
+                <label for="keyword">Поиск</label>
+                <input id="keyword"
+                       type="text"
+                       name="keyword"
+                       placeholder="Номер / клиент / программа"
+                       th:value="${keyword}">
+            </div>
+
+            <div class="field">
+                <label for="statusFilter">Статус полиса</label>
+                <select id="statusFilter" name="statusFilter">
+                    <option value="">Все статусы</option>
+                    <option th:each="st : ${allStatuses}"
+                            th:value="${st}"
+                            th:text="${st}"
+                            th:selected="${statusFilter} == ${st}">
+                    </option>
+                </select>
+            </div>
+
+            <input type="hidden" name="sortField" th:value="${sortField}">
+            <input type="hidden" name="sortDir" th:value="${sortDir}">
+
+            <button class="btn btn-primary" type="submit">Применить</button>
+            <a class="link-btn" th:href="@{/policies}">Сбросить</a>
+        </div>
+    </form>
+
+    <!-- Таблица -->
+    <div class="table-card">
+        <div class="table-head">
+            <div class="hint">
+                Найдено: <b th:text="${#lists.size(policies)}">0</b>
+            </div>
+            <div class="hint">Действия доступны для ролей MANAGER / ADMIN</div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{/policies(
+                                sortField='id',
+                                sortDir=${reverseSortDir},
+                                keyword=${keyword},
+                                statusFilter=${statusFilter}
+                           )}">
+                            ID
+                            <span class="sort-ico">↕</span>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{/policies(
+                                sortField='policyNumber',
+                                sortDir=${reverseSortDir},
+                                keyword=${keyword},
+                                statusFilter=${statusFilter}
+                           )}">
+                            Номер полиса
+                            <span class="sort-ico">↕</span>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{/policies(
+                                sortField='client.fullName',
+                                sortDir=${reverseSortDir},
+                                keyword=${keyword},
+                                statusFilter=${statusFilter}
+                           )}">
+                            Клиент
+                            <span class="sort-ico">↕</span>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{/policies(
+                                sortField='program.name',
+                                sortDir=${reverseSortDir},
+                                keyword=${keyword},
+                                statusFilter=${statusFilter}
+                           )}">
+                            Программа
+                            <span class="sort-ico">↕</span>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{/policies(
+                                sortField='startDate',
+                                sortDir=${reverseSortDir},
+                                keyword=${keyword},
+                                statusFilter=${statusFilter}
+                           )}">
+                            Дата начала
+                            <span class="sort-ico">↕</span>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{/policies(
+                                sortField='endDate',
+                                sortDir=${reverseSortDir},
+                                keyword=${keyword},
+                                statusFilter=${statusFilter}
+                           )}">
+                            Дата окончания
+                            <span class="sort-ico">↕</span>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{/policies(
+                                sortField='premium',
+                                sortDir=${reverseSortDir},
+                                keyword=${keyword},
+                                statusFilter=${statusFilter}
+                           )}">
+                            Премия
+                            <span class="sort-ico">↕</span>
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="sort-link"
+                           th:href="@{/policies(
+                                sortField='status',
+                                sortDir=${reverseSortDir},
+                                keyword=${keyword},
+                                statusFilter=${statusFilter}
+                           )}">
+                            Статус
+                            <span class="sort-ico">↕</span>
+                        </a>
+                    </th>
+
+                    <th sec:authorize="hasAnyRole('MANAGER','ADMIN')">Действия</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="p : ${policies}">
+                    <td class="mono" th:text="${p.id}"></td>
+                    <td class="mono" th:text="${p.policyNumber}"></td>
+
+                    <td th:text="${p.client != null ? p.client.fullName : '—'}"></td>
+                    <td th:text="${p.program != null ? p.program.name : '—'}"></td>
+
+                    <td class="mono" th:text="${p.startDate}"></td>
+                    <td class="mono" th:text="${p.endDate}"></td>
+
+                    <td class="mono" th:text="${p.premium}"></td>
+
+                    <td>
+                        <span class="status"
+                              th:classappend="${p.status.name() == 'ACTIVE' ? ' st-active' : (p.status.name() == 'EXPIRED' ? ' st-expired' : ' st-cancelled')}">
+                            <span class="led" aria-hidden="true"></span>
+                            <span th:text="${p.status}">ACTIVE</span>
+                        </span>
+                    </td>
+
+
+                    <td sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+                        <div class="actions">
+                            <a class="link-btn btn-primary"
+                               th:href="@{'/policies/' + ${p.id} + '/edit'}">✏️ Редактировать</a>
+
+                            <form class="inline-form"
+                                  th:action="@{'/policies/' + ${p.id} + '/delete'}"
+                                  method="post"
+                                  onsubmit="return confirm('Удалить полис?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button class="btn btn-danger" type="submit">🗑 Удалить</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(policies)}">
+                    <td class="empty" colspan="9">Полисы не найдены</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${title}">Полис ДМС</title>
+
+    <style>
+        :root{
+            --bg: #F6F0E6;
+            --card:#FFFFFF;
+            --ink:#1F2A37;
+            --muted:#6B7280;
+            --line: rgba(31,42,55,.12);
+            --blue:#11A6B7;
+            --blue-2:#0B8EA0;
+            --beige-2:#FFF8EE;
+            --shadow: 0 16px 30px rgba(31,42,55,.10);
+            --r:18px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--ink);
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+        .wrap{ max-width: 900px; margin:0 auto; padding: 26px 16px 40px; }
+
+        .head{
+            display:flex; flex-wrap:wrap; gap:10px;
+            align-items:flex-end; justify-content:space-between;
+            margin-bottom: 12px;
+        }
+        .title{
+            margin:0;
+            font-size: 26px;
+            letter-spacing: .2px;
+        }
+        .crumbs{
+            display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+        }
+        .link{
+            text-decoration:none;
+            color: var(--blue-2);
+            font-weight: 650;
+            padding: 8px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.55);
+            border: 1px solid rgba(17,166,183,.20);
+        }
+        .link:hover{ background: rgba(17,166,183,.06); border-color: rgba(17,166,183,.35); }
+
+        .card{
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--r);
+            padding: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .hint{
+            margin: 0 0 14px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: var(--beige-2);
+            border: 1px solid rgba(31,42,55,.10);
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        form{ margin:0; }
+        .grid{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 720px){
+            .grid{ grid-template-columns: 1fr; }
+        }
+
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap: 6px;
+        }
+        label{
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 650;
+        }
+        input, select{
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(31,42,55,.14);
+            background: #fff;
+            outline: none;
+            font-size: 14px;
+        }
+        input:focus, select:focus{
+            border-color: rgba(17,166,183,.65);
+            box-shadow: 0 0 0 4px rgba(17,166,183,.14);
+        }
+        .span-2{ grid-column: span 2; }
+        @media (max-width: 720px){
+            .span-2{ grid-column: span 1; }
+        }
+
+        .actions{
+            margin-top: 14px;
+            display:flex; gap:10px; flex-wrap:wrap;
+            align-items:center;
+        }
+        .btn{
+            border: none;
+            border-radius: 14px;
+            padding: 11px 14px;
+            cursor:pointer;
+            font-weight: 800;
+            font-size: 14px;
+        }
+        .btn-primary{
+            background: linear-gradient(135deg, var(--blue), rgba(17,166,183,.70));
+            color: #fff;
+        }
+        .btn-primary:hover{ filter: brightness(.96); }
+        .btn-ghost{
+            background: rgba(255,255,255,.60);
+            border: 1px solid rgba(31,42,55,.14);
+            color: var(--ink);
+        }
+        .btn-ghost:hover{ background: rgba(17,166,183,.06); border-color: rgba(17,166,183,.35); }
+
+        .err{
+            margin-top: 6px;
+            color: #b42318;
+            font-size: 12px;
+            font-weight: 650;
+        }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <div class="head">
+        <h1 class="title" th:text="${title}">Полис ДМС</h1>
+
+        <div class="crumbs">
+            <a class="link" th:href="@{/policies}">← К списку полисов</a>
+            <a class="link" th:href="@{/}">На главную</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <p class="hint">
+            Заполните поля полиса. Номер полиса должен быть уникальным. Клиент и программа выбираются из справочников.
+        </p>
+
+        <form th:object="${policy}"
+              th:action="${policy.id} == null ? @{/policies} : @{'/policies/' + ${policy.id}}"
+              method="post">
+
+            <input type="hidden"
+                   th:if="${_csrf != null}"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}"/>
+
+            <div class="grid">
+                <div class="field span-2">
+                    <label for="policyNumber">Номер полиса</label>
+                    <input id="policyNumber" type="text" th:field="*{policyNumber}" placeholder="Например: DMS-0003" required/>
+                    <div class="err" th:if="${#fields.hasErrors('policyNumber')}" th:errors="*{policyNumber}">Ошибка</div>
+                </div>
+
+                <div class="field">
+                    <label for="client">Клиент</label>
+                    <select id="client" th:field="*{client}" required>
+                        <option value="" disabled selected>— выберите клиента —</option>
+                        <option th:each="c : ${clients}"
+                                th:value="${c.id}"
+                                th:text="${c.fullName}">
+                        </option>
+                    </select>
+                    <div class="err" th:if="${#fields.hasErrors('client')}" th:errors="*{client}">Ошибка</div>
+                </div>
+
+                <div class="field">
+                    <label for="program">Программа</label>
+                    <select id="program" th:field="*{program}" required>
+                        <option value="" disabled selected>— выберите программу —</option>
+                        <option th:each="pr : ${programs}"
+                                th:value="${pr.id}"
+                                th:text="${pr.name}">
+                        </option>
+                    </select>
+                    <div class="err" th:if="${#fields.hasErrors('program')}" th:errors="*{program}">Ошибка</div>
+                </div>
+
+                <div class="field">
+                    <label for="startDate">Дата начала</label>
+                    <input id="startDate" type="date" th:field="*{startDate}" required/>
+                    <div class="err" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}">Ошибка</div>
+                </div>
+
+                <div class="field">
+                    <label for="endDate">Дата окончания</label>
+                    <input id="endDate" type="date" th:field="*{endDate}" required/>
+                    <div class="err" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}">Ошибка</div>
+                </div>
+
+                <div class="field">
+                    <label for="premium">Премия</label>
+                    <input id="premium" type="number" step="0.01" min="0" th:field="*{premium}" placeholder="0.00" required/>
+                    <div class="err" th:if="${#fields.hasErrors('premium')}" th:errors="*{premium}">Ошибка</div>
+                </div>
+
+                <div class="field">
+                    <label for="status">Статус</label>
+                    <select id="status" th:field="*{status}" required>
+                        <option th:each="st : ${T(ru.fa.dpi23.dmsisms.entity.PolicyStatus).values()}"
+                                th:value="${st}"
+                                th:text="${st}">
+                        </option>
+                    </select>
+                    <div class="err" th:if="${#fields.hasErrors('status')}" th:errors="*{status}">Ошибка</div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" type="submit">Сохранить</button>
+                <a class="btn btn-ghost" th:href="@{/policies}" style="text-decoration:none; display:inline-flex; align-items:center;">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

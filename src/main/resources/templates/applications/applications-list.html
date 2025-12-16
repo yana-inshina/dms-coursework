@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Заявки на ДМС</title>
+
+    <style>
+        :root{
+            --bg:#F6F0E6;
+            --card:#FFFFFF;
+            --ink:#1F2A37;
+            --muted:#6B7280;
+            --line:rgba(31,42,55,.10);
+            --blue:#11A6B7;
+            --blue-2:#0B8EA0;
+            --beige-2:#FFF8EE;
+            --shadow-soft:0 10px 24px rgba(31,42,55,.08);
+            --shadow:0 10px 30px rgba(17,166,183,.12);
+            --r:18px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--ink);
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+        .wrap{ max-width:1200px; margin:0 auto; padding:26px 16px 44px; }
+
+        .topbar{
+            background:rgba(255,255,255,.72);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:14px 16px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            box-shadow:var(--shadow-soft);
+            backdrop-filter:blur(8px);
+            flex-wrap:wrap;
+        }
+        .brand{ display:flex; align-items:center; gap:10px; min-width:260px; }
+        .logo{
+            width:42px; height:42px; border-radius:14px;
+            background:linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+            box-shadow:0 10px 22px rgba(17,166,183,.22);
+        }
+        .brand h1{ margin:0; font-size:18px; line-height:1.15; }
+        .brand p{ margin:2px 0 0; font-size:12px; color:var(--muted); }
+
+        .chip{
+            display:inline-flex; align-items:center; gap:8px;
+            padding:8px 10px;
+            border-radius:999px;
+            background:var(--beige-2);
+            border:1px solid rgba(31,42,55,.10);
+            font-size:13px;
+            white-space:nowrap;
+        }
+        .dot{ width:8px; height:8px; border-radius:50%; background:var(--blue); box-shadow:0 0 0 4px rgba(17,166,183,.12); }
+
+        .spacer{ flex:1; }
+
+        .link-btn{
+            border-radius:12px;
+            padding:10px 12px;
+            font-weight:900;
+            border:1px solid rgba(17,166,183,.35);
+            background:#fff;
+            color:var(--blue-2);
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .hero{
+            margin-top:14px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:18px;
+            box-shadow:var(--shadow-soft);
+        }
+        .hero h2{ margin:0; font-size:20px; }
+        .hero p{ margin:8px 0 0; color:var(--muted); }
+
+        .table-card{
+            margin-top:14px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            box-shadow:var(--shadow-soft);
+            overflow:hidden;
+        }
+        .table-head{
+            padding:12px 16px;
+            border-bottom:1px solid var(--line);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            background:rgba(255,255,255,.60);
+            flex-wrap:wrap;
+        }
+        .hint{ color:var(--muted); font-size:13px; }
+
+        .table-wrap{ overflow:auto; }
+        table{
+            width:100%;
+            border-collapse:collapse;
+            min-width:950px;
+        }
+        thead th{
+            text-align:left;
+            font-size:12px;
+            letter-spacing:.03em;
+            text-transform:uppercase;
+            color:#111827;
+            background:rgba(255,248,238,.85);
+            border-bottom:1px solid var(--line);
+            padding:12px 12px;
+            white-space:nowrap;
+        }
+        tbody td{
+            padding:12px 12px;
+            border-bottom:1px solid rgba(31,42,55,.08);
+            vertical-align:top;
+        }
+        tbody tr:hover{ background:rgba(17,166,183,.05); }
+
+        .mono{ font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1; }
+
+        .status-tag{
+            display:inline-flex;
+            align-items:center;
+            padding:6px 10px;
+            border-radius:999px;
+            border:1px solid rgba(31,42,55,.12);
+            font-size:12px;
+            font-weight:800;
+            white-space:nowrap;
+        }
+        .status-new{
+            background:rgba(59,130,246,.06);
+            border-color:rgba(59,130,246,.45);
+            color:#1d4ed8;
+        }
+        .status-approved{
+            background:rgba(34,197,94,.06);
+            border-color:rgba(34,197,94,.45);
+            color:#166534;
+        }
+        .status-rejected{
+            background:rgba(239,68,68,.05);
+            border-color:rgba(239,68,68,.45);
+            color:#991b1b;
+        }
+        .status-converted{
+            background:rgba(17,166,183,.08);
+            border-color:rgba(17,166,183,.45);
+            color:#0b8ea0;
+        }
+
+        .empty{ padding:16px; color:var(--muted); }
+        .row-link{
+            text-decoration:none;
+            color:var(--blue-2);
+            font-weight:600;
+        }
+        .row-link:hover{ text-decoration:underline; }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo" aria-hidden="true"></div>
+            <div>
+                <h1>Заявки на ДМС</h1>
+                <p>Оставленные заявки и расчёт премии</p>
+            </div>
+        </div>
+
+        <div class="chip">
+            <span class="dot"></span>
+            Найдено:
+            <b th:text="${#lists.size(items)}">0</b>
+        </div>
+
+        <div class="spacer"></div>
+
+        <!-- переход к корпоративным заявкам: скрываем кнопку для INDIVIDUAL-пользователей -->
+        <a class="link-btn" th:href="@{/corporate-applications}"
+           sec:authorize="hasAnyRole('MANAGER','ADMIN','CORPORATE')">
+            Корпоративные заявки
+        </a>
+
+        <!-- новая индивидуальная заявка -->
+        <a class="link-btn"
+           th:href="@{/applications/new}"
+           sec:authorize="hasAnyRole('MANAGER','ADMIN','USER')">
+            + Новая заявка ДМС
+        </a>
+
+        <a class="link-btn" th:href="@{/}">
+            ← На главную
+        </a>
+    </div>
+
+    <div class="hero">
+        <h2>Список заявок</h2>
+        <p>
+            Здесь отображаются все индивидуальные заявки по программам ДМС.
+            Кликните по названию программы или ФИО, чтобы открыть карточку заявки.
+        </p>
+    </div>
+
+    <div class="table-card">
+        <div class="table-head">
+            <div class="hint">Всего заявок: <b th:text="${#lists.size(items)}">0</b></div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Программа</th>
+                    <th>Заявитель</th>
+                    <th>Телефон</th>
+                    <th>E-mail</th>
+                    <th>Премия, ₽</th>
+                    <th>Статус</th>
+                    <th>Создана</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${items}">
+                    <td class="mono" th:text="${a.id}">1</td>
+
+                    <td>
+                        <a class="row-link"
+                           th:href="@{'/applications/' + ${a.id}}"
+                           th:text="${a.program != null ? a.program.name : '-'}">
+                            Программа
+                        </a>
+                    </td>
+
+                    <td th:text="${a.fullName}">Иванов Иван Иванович</td>
+                    <td class="mono" th:text="${a.phone}">+7...</td>
+                    <td th:text="${a.email}">email@example.com</td>
+
+                    <td class="mono"
+                        th:text="${a.calculatedPremium != null ? #numbers.formatDecimal(a.calculatedPremium, 1, 2) : '-'}">
+                        12000.00
+                    </td>
+
+                    <td>
+                        <span class="status-tag"
+                              th:classappend="${a.status.name() == 'NEW' ? ' status-new'
+                              : (a.status.name() == 'APPROVED' ? ' status-approved'
+                              : (a.status.name() == 'CONVERTED_TO_POLICY' ? ' status-converted'
+                              : ' status-rejected'))}"
+                              th:text="${a.status}">
+                            NEW
+                        </span>
+                    </td>
+
+                    <td class="mono"
+                        th:text="${a.createdAt != null ? #temporals.format(a.createdAt, 'dd.MM.yyyy HH:mm') : '-'}">
+                        03.12.2025 10:00
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(items)}">
+                    <td class="empty" colspan="8">Заявок пока нет</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

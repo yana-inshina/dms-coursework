@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/dms_coursework?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: dms_user
+    password: StrongPass123!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    # Keep the Hibernate session open during view rendering. This prevents
+    # LazyInitializationException when accessing lazy-loaded associations in
+    # Thymeleaf templates (e.g. corporateClient on CorporateApplication).
+    open-in-view: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+logging:
+  level:
+    org.hibernate.SQL: debug

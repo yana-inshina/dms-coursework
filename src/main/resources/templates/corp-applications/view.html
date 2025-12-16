@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Корпоративная заявка</title>
+
+    <style>
+        :root{
+            --bg:#F6F0E6;
+            --card:#FFFFFF;
+            --ink:#1F2A37;
+            --muted:#6B7280;
+            --line:rgba(31,42,55,.10);
+            --blue:#11A6B7;
+            --blue-2:#0B8EA0;
+            --beige-2:#FFF8EE;
+            --shadow-soft:0 10px 24px rgba(31,42,55,.08);
+            --shadow:0 10px 30px rgba(17,166,183,.12);
+            --r:18px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--ink);
+            /* Фиксируем фон по экрану, чтобы плавный градиент не обрывался внизу */
+            min-height:100vh;
+            background-attachment:fixed;
+            background-repeat:no-repeat;
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+        .wrap{ max-width:1100px; margin:0 auto; padding:26px 16px 44px; }
+
+        .topbar{
+            background:rgba(255,255,255,.72);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:14px 16px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            box-shadow:var(--shadow-soft);
+            backdrop-filter:blur(8px);
+            flex-wrap:wrap;
+        }
+        .brand{ display:flex; align-items:center; gap:10px; }
+        .logo{
+            width:42px; height:42px; border-radius:14px;
+            background:linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+            box-shadow:0 10px 22px rgba(17,166,183,.22);
+        }
+        .brand h1{ margin:0; font-size:18px; }
+        .brand p{ margin:2px 0 0; font-size:12px; color:var(--muted); }
+
+        .spacer{ flex:1; }
+
+        .link-btn{
+            border-radius:12px;
+            padding:10px 12px;
+            font-weight:900;
+            border:1px solid rgba(17,166,183,.35);
+            background:#fff;
+            color:var(--blue-2);
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .card{
+            margin-top:16px;
+            background:var(--card);
+            border-radius:var(--r);
+            border:1px solid var(--line);
+            box-shadow:var(--shadow-soft);
+            padding:18px 18px 20px;
+        }
+
+        .card-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:16px;
+            margin-bottom:14px;
+        }
+
+        .field-row{ margin-bottom:8px; }
+        .field-label{
+            font-size:12px;
+            color:var(--muted);
+            margin-bottom:2px;
+        }
+        .field-value{
+            font-size:14px;
+        }
+        .mono{
+            font-variant-numeric:tabular-nums;
+            font-feature-settings:"tnum" 1;
+        }
+
+        .badge{
+            display:inline-flex;
+            align-items:center;
+            padding:6px 10px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:700;
+            border:1px solid rgba(31,42,55,.16);
+        }
+        .badge-new{
+            background:rgba(59,130,246,.06);
+            color:#1d4ed8;
+            border-color:rgba(59,130,246,.45);
+        }
+        .badge-approved{
+            background:rgba(34,197,94,.06);
+            color:#166534;
+            border-color:rgba(34,197,94,.45);
+        }
+        .badge-rejected{
+            background:rgba(239,68,68,.06);
+            color:#991b1b;
+            border-color:rgba(239,68,68,.45);
+        }
+        .badge-converted{
+            background:rgba(17,166,183,.08);
+            color:#0b8ea0;
+            border-color:rgba(17,166,183,.45);
+        }
+
+        .grid{
+            display:grid;
+            grid-template-columns:1.4fr 1fr;
+            gap:18px;
+        }
+        @media (max-width:900px){
+            .grid{ grid-template-columns:1fr; }
+        }
+
+        .money{
+            font-size:20px;
+            font-weight:800;
+        }
+        .money small{
+            font-size:12px;
+            font-weight:500;
+            color:var(--muted);
+        }
+
+        .actions{
+            margin-top:14px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:12px;
+        }
+        .btn{
+            border-radius:10px;
+            padding:8px 12px;
+            font-size:14px;
+            border:1px solid rgba(31,42,55,.16);
+            background:#fff;
+            cursor:pointer;
+        }
+        .btn-primary{
+            border-color:rgba(17,166,183,.5);
+            color:var(--blue-2);
+            font-weight:700;
+        }
+        .btn-danger{
+            border-color:rgba(239,68,68,.5);
+            color:#b91c1c;
+        }
+
+        textarea.readonly{
+            width:100%;
+            border-radius:10px;
+            border:1px dashed rgba(31,42,55,.16);
+            padding:8px 10px;
+            font-size:13px;
+            resize:none;
+            background:#f9fafb;
+        }
+        textarea.comment{
+            width:100%;
+            border-radius:10px;
+            border:1px solid rgba(31,42,55,.18);
+            padding:8px 10px;
+            font-size:13px;
+            resize:vertical;
+        }
+        .comment-block{
+            margin-top:14px;
+        }
+
+        .client-sub{
+            font-size:12px;
+            color:var(--muted);
+            margin-top:2px;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <!-- Сообщение об успешном создании заявки -->
+    <div th:if="${appSuccess}" style="margin-bottom:14px; padding:12px; border-radius:14px;
+                border:1px solid rgba(34,197,94,.35); background:rgba(220,255,230,.90);">
+        <span style="font-weight:600; color:#166534;">Корпоративная заявка успешно создана.</span>
+        Вы можете просмотреть детали заявки ниже.
+    </div>
+
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo"></div>
+            <div>
+                <h1 th:text="'Корпоративная заявка #' + ${item.id}">Корпоративная заявка #1</h1>
+                <p th:text="${item.corporateClient != null ?
+                             item.corporateClient.name + ' (ИНН ' + item.corporateClient.inn + ')' :
+                             '—'}">
+                    ООО «Здоровье Плюс» (ИНН 7701001001)
+                </p>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <a class="link-btn" th:href="@{/corporate-applications}">
+            ← К списку заявок
+        </a>
+    </div>
+
+    <div class="card">
+
+        <div class="card-header">
+            <div>
+                <div class="field-label">Создана</div>
+                <div class="field-value mono"
+                     th:text="${#temporals.format(item.createdAt, 'dd.MM.yyyy HH:mm')}">
+                    03.12.2025 10:00
+                </div>
+
+                <div class="field-row" style="margin-top:8px;">
+                    <div class="field-label">Обработана</div>
+                    <div class="field-value mono"
+                         th:text="${item.processedAt != null ? #temporals.format(item.processedAt, 'dd.MM.yyyy HH:mm') : '–'}">
+                        –
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <span class="badge"
+                      th:classappend="|${
+                          item.status.name() == 'NEW' ? ' badge-new' :
+                          item.status.name() == 'APPROVED' ? ' badge-approved' :
+                          item.status.name() == 'REJECTED' ? ' badge-rejected' :
+                          ' badge-converted'
+                      }|"
+                      th:text="${item.status}">
+                    NEW
+                </span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div>
+                <!-- КЛИЕНТ (организация) -->
+                <div class="field-row">
+                    <div class="field-label">Клиент (организация)</div>
+
+                    <!-- если клиент есть -->
+                    <div class="field-value" th:if="${item.corporateClient != null}">
+                        <span th:text="${item.corporateClient.name}">ООО «Здоровье Плюс»</span>
+
+                        <div class="client-sub"
+                             th:text="${'ИНН ' + item.corporateClient.inn}">
+                            ИНН 7701001001
+                        </div>
+
+                        <div class="client-sub"
+                             th:text="${item.corporateClient.region != null ?
+                                      item.corporateClient.region.name :
+                                      'Регион не указан'}">
+                            Москва и МО
+                        </div>
+
+                        <div class="client-sub"
+                             th:text="${item.corporateClient.contactPerson != null ?
+                                      item.corporateClient.contactPerson :
+                                      'Контактное лицо не указано'}">
+                            Иванова Анна, HR-директор
+                        </div>
+
+                        <!-- Ссылки для просмотра и редактирования карточки организации -->
+                        <!-- Показываем ссылку только менеджеру или администратору. Корпоративный пользователь
+                             не имеет доступа к общей странице редактирования организации, для него
+                             доступна страница 'Моя организация' в личном кабинете. -->
+                        <div class="client-sub" sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+                            <a th:href="@{'/corp-clients/' + ${item.corporateClient.id} + '/edit'}"
+                               style="color:#0b8ea0; text-decoration:underline; font-size:12px;">
+                                Редактировать карточку организации
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- если клиента нет (на всякий случай) -->
+                    <div class="field-value" th:if="${item.corporateClient == null}">
+                        —
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field-label">Комментарий менеджера</div>
+                    <div class="field-value" th:if="${item.status.name() != 'NEW' and item.comment != null}">
+                        <textarea class="readonly" rows="3" readonly
+                                  th:text="${item.comment}"></textarea>
+                    </div>
+                    <div class="field-value" th:if="${item.status.name() == 'NEW'}">
+                        <span style="font-size:12px; color:var(--muted);">
+                            Комментарий можно добавить при одобрении или отклонении заявки.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="field-row">
+                    <div class="field-label">Программа</div>
+                    <div class="field-value"
+                         th:text="${item.program != null ? item.program.name : '-'}">
+                        Базовая программа ДМС
+                    </div>
+                </div>
+
+                <!-- Тарифный план скрыт, так как тарифы больше не выбираются пользователем. -->
+
+                <div class="field-row">
+                    <div class="field-label">Регион обслуживания</div>
+                    <div class="field-value"
+                         th:text="${item.serviceRegion != null ? item.serviceRegion.name : '-'}">
+                        Москва и МО
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field-label">Headcount</div>
+                    <div class="field-value mono" th:text="${item.headcount}">120</div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field-label">Средний возраст / бенд</div>
+                    <div class="field-value"
+                         th:text="${item.averageAge != null ? item.averageAge + ' лет' :
+                                  (item.ageBand != null ? item.ageBand : '–')}">
+                        35 лет
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field-label">Базовая цена (за 1 сотрудника)</div>
+                    <div class="field-value mono"
+                         th:text="${item.basePriceSnapshot != null ?
+                                   item.basePriceSnapshot + ' ₽' :
+                                   '—'}">
+                        12000.00 ₽
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field-label">Страховая сумма</div>
+                    <div class="field-value mono"
+                         th:text="${item.program != null && item.program.insuranceSum != null ? item.program.insuranceSum + ' ₽' : '—'}">
+                        2000000 ₽
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field-label">Рассчитанная премия</div>
+                    <div class="field-value money">
+                        <span th:text="${item.calculatedPremium != null ? item.calculatedPremium : '—'}">250000</span>
+                        <small> ₽ / год</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок действий для MANAGER (можно ограничить по ролям) -->
+        <div class="actions" sec:authorize="hasRole('MANAGER')">
+            <!-- Одобрить (NEW) -->
+            <form th:action="@{|/corporate-applications/${item.id}/approve|}" method="post"
+                  th:if="${item.status.name() == 'NEW'}">
+                <div class="field-label">Комментарий менеджера (опционально)</div>
+                <textarea class="comment" name="comment" rows="2"
+                          placeholder="Краткий комментарий по решению..."></textarea>
+                <div style="margin-top:6px;">
+                    <button class="btn btn-primary" type="submit">Одобрить заявку</button>
+                </div>
+            </form>
+
+            <!-- Отклонить (NEW или APPROVED) -->
+            <form th:action="@{|/corporate-applications/${item.id}/reject|}" method="post"
+                  th:if="${item.status.name() != 'REJECTED' and item.status.name() != 'CONVERTED_TO_POLICY'}">
+                <div class="field-label">Комментарий при отклонении</div>
+                <textarea class="comment" name="comment" rows="2"
+                          placeholder="Причина отклонения..."></textarea>
+                <div style="margin-top:6px;">
+                    <button class="btn btn-danger" type="submit">Отклонить</button>
+                </div>
+            </form>
+
+            <!-- Выпустить полис из APPROVED -->
+            <form th:action="@{|/corporate-applications/${item.id}/convert|}" method="post"
+                  th:if="${item.status.name() == 'APPROVED'}">
+                <button class="btn btn-primary" type="submit">Выпустить полис</button>
+            </form>
+
+            <div th:if="${item.status.name() == 'CONVERTED_TO_POLICY'}"
+                 style="font-size:13px; color:var(--muted);">
+                По этой заявке уже был выпущен полис.
+            </div>
+        </div>
+
+        <!-- Условия программы (покрытия, исключения, акции, регионы и медорганизации) -->
+        <div style="margin-top:24px;">
+            <h3 style="margin:0 0 8px; font-size:16px;">Условия программы</h3>
+            <!-- Покрываемые услуги и заболевания -->
+            <div class="field-row">
+                <div class="field-label">Покрываемые услуги и заболевания</div>
+                <div class="field-value">
+                    <span th:if="${#lists.isEmpty(item.program.coverages)}">Нет</span>
+                    <ul th:if="${!#lists.isEmpty(item.program.coverages)}" style="margin:4px 0 0 16px; padding:0; list-style-type: disc;">
+                        <li th:each="cov : ${item.program.coverages}" th:text="${cov.name}"></li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Исключения -->
+            <div class="field-row">
+                <div class="field-label">Исключения</div>
+                <div class="field-value">
+                    <span th:if="${#lists.isEmpty(item.program.exclusions)}">Нет</span>
+                    <ul th:if="${!#lists.isEmpty(item.program.exclusions)}" style="margin:4px 0 0 16px; padding:0; list-style-type: disc;">
+                        <li th:each="exc : ${item.program.exclusions}" th:text="${exc.name}"></li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Акции и скидки -->
+            <div class="field-row">
+                <div class="field-label">Акции и скидки</div>
+                <div class="field-value">
+                    <span th:if="${#lists.isEmpty(item.program.promoOffers)}">Нет</span>
+                    <ul th:if="${!#lists.isEmpty(item.program.promoOffers)}" style="margin:4px 0 0 16px; padding:0; list-style-type: disc;">
+                        <li th:each="po : ${item.program.promoOffers}" th:text="${po.name}"></li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Регионы действия -->
+            <div class="field-row">
+                <div class="field-label">Регионы действия</div>
+                <div class="field-value">
+                    <span th:if="${#lists.isEmpty(item.program.regions)}">Нет</span>
+                    <ul th:if="${!#lists.isEmpty(item.program.regions)}" style="margin:4px 0 0 16px; padding:0; list-style-type: disc;">
+                        <li th:each="reg : ${item.program.regions}" th:text="${reg.name}"></li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Медицинские организации -->
+            <div class="field-row">
+                <div class="field-label">Медицинские организации</div>
+                <div class="field-value">
+                    <span th:if="${#lists.isEmpty(item.program.medicalOrganizations)}">Нет</span>
+                    <ul th:if="${!#lists.isEmpty(item.program.medicalOrganizations)}" style="margin:4px 0 0 16px; padding:0; list-style-type: disc;">
+                        <li th:each="mo : ${item.program.medicalOrganizations}" th:text="${mo.name}"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

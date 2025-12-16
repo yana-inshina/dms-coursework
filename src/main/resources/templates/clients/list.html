@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Список клиентов</title>
+
+    <style>
+        :root{
+            --bg:#F6F0E6;
+            --card:#FFFFFF;
+            --ink:#1F2A37;
+            --muted:#6B7280;
+            --line: rgba(31,42,55,.12);
+            --blue:#11A6B7;
+            --blue-2:#0B8EA0;
+            --beige-2:#FFF8EE;
+            --shadow: 0 16px 30px rgba(31,42,55,.10);
+            --r:18px;
+        }
+        *{ box-sizing:border-box; }
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--ink);
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+        .wrap{ max-width: 1100px; margin:0 auto; padding: 26px 16px 40px; }
+
+        .top{
+            display:flex; flex-wrap:wrap; gap:12px;
+            align-items:flex-end; justify-content:space-between;
+            margin-bottom: 12px;
+        }
+        .title{ margin:0; font-size: 26px; letter-spacing:.2px; }
+
+        .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+        .link{
+            text-decoration:none;
+            color: var(--blue-2);
+            font-weight: 750;
+            padding: 8px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.55);
+            border: 1px solid rgba(17,166,183,.20);
+        }
+        .link:hover{ background: rgba(17,166,183,.06); border-color: rgba(17,166,183,.35); }
+
+        .btn{
+            display:inline-flex; align-items:center; gap:8px;
+            border:none;
+            border-radius: 14px;
+            padding: 10px 12px;
+            cursor:pointer;
+            font-weight: 850;
+            font-size: 14px;
+            text-decoration:none;
+        }
+        .btn-primary{
+            background: linear-gradient(135deg, var(--blue), rgba(17,166,183,.70));
+            color:#fff;
+        }
+        .btn-primary:hover{ filter:brightness(.96); }
+        .btn-ghost{
+            background: rgba(255,255,255,.65);
+            border: 1px solid rgba(31,42,55,.14);
+            color: var(--ink);
+        }
+        .btn-ghost:hover{ background: rgba(17,166,183,.06); border-color: rgba(17,166,183,.35); }
+
+        .card{
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--r);
+            padding: 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .toolbar{
+            display:flex; flex-wrap:wrap; gap:10px;
+            align-items:center; justify-content:space-between;
+            margin-bottom: 12px;
+        }
+        .search{
+            display:flex; flex-wrap:wrap; gap:8px;
+            align-items:center;
+        }
+        .input{
+            min-width: 280px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(31,42,55,.14);
+            background:#fff;
+            outline:none;
+            font-size: 14px;
+        }
+        .input:focus{
+            border-color: rgba(17,166,183,.65);
+            box-shadow: 0 0 0 4px rgba(17,166,183,.14);
+        }
+
+        table{
+            width:100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow:hidden;
+            border-radius: 16px;
+            border: 1px solid rgba(31,42,55,.12);
+        }
+        thead th{
+            background: rgba(255,248,238,.75);
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(31,42,55,.10);
+            text-align:left;
+            vertical-align:middle;
+            white-space:nowrap;
+        }
+        tbody td{
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(31,42,55,.08);
+            vertical-align:top;
+        }
+        tbody tr:hover td{ background: rgba(17,166,183,.04); }
+        tbody tr:last-child td{ border-bottom:none; }
+
+        /* ссылка-заголовок со стрелкой сортировки */
+        .sort-link{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            color: var(--ink);
+            font-weight: 800;
+            text-decoration:none;
+        }
+        .sort-link:hover{ text-decoration:none; }
+        .sort-link:hover .sort-ico{
+            background: rgba(17,166,183,.06);
+            border-color: rgba(17,166,183,.35);
+        }
+
+        .sort-ico{
+          width:22px; height:22px;
+          border-radius:10px;
+          display:grid; place-items:center;
+          background:rgba(17,166,183,.10);
+          border:1px solid rgba(17,166,183,.18);
+          color:var(--blue-2);
+          font-size:12px;
+        }
+
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 850;
+            font-size: 12px;
+            border: 1px solid rgba(17,166,183,.25);
+            background: rgba(17,166,183,.10);
+            color: var(--blue-2);
+            white-space:nowrap;
+        }
+        .pill.beige{
+            border-color: rgba(31,42,55,.18);
+            background: rgba(255,248,238,.95);
+            color: var(--ink);
+        }
+
+        .row-actions{
+            display:flex; flex-wrap:wrap; gap:8px;
+            align-items:center;
+        }
+        .a-mini{
+            font-weight: 850;
+            text-decoration:none;
+            color: var(--blue-2);
+            padding: 7px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(17,166,183,.22);
+            background: rgba(255,255,255,.75);
+        }
+        .a-mini:hover{ background: rgba(17,166,183,.06); border-color: rgba(17,166,183,.35); }
+
+        .danger{
+            border-color: rgba(239,68,68,.25);
+            color: #B42318;
+            background: rgba(239,68,68,.06);
+        }
+        .danger:hover{ background: rgba(239,68,68,.10); border-color: rgba(239,68,68,.35); }
+
+        .empty{
+            padding: 18px;
+            color: var(--muted);
+            text-align:center;
+        }
+
+        .small{
+            font-size: 12px;
+            color: var(--muted);
+        }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <div class="top">
+        <h1 class="title">Список клиентов</h1>
+
+        <div class="actions">
+            <a class="link" th:href="@{/}">← На главную</a>
+            <!-- ссылка на раздел корпоративных клиентов, чтобы пользователи
+                 могли управлять организациями отдельно от физических лиц -->
+            <a class="link" th:href="@{/corp-clients}">Корп. клиенты</a>
+
+            <span sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+                <a class="btn btn-primary" th:href="@{/clients/new}">➕ Добавить клиента</a>
+            </span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="toolbar">
+            <form class="search" th:action="@{/clients}" method="get">
+                <input class="input" type="text" name="keyword"
+                       placeholder="Поиск по ФИО/названию"
+                       th:value="${keyword}"/>
+
+                <input type="hidden" name="sortField" th:value="${sortField}">
+                <input type="hidden" name="sortDir" th:value="${sortDir}">
+
+                <button class="btn btn-primary" type="submit">Искать</button>
+                <a class="btn btn-ghost" th:href="@{/clients}">Сбросить</a>
+            </form>
+
+            <div class="small">
+                Нажимай на заголовки столбцов для сортировки
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th style="width:70px;">ID</th>
+
+                <!-- ФИО / Название -->
+                <th>
+                    <a class="sort-link"
+                       th:href="@{/clients(sortField='fullName', sortDir=${reverseSortDir}, keyword=${keyword})}">
+                        ФИО / Название
+                        <span class="sort-ico"
+                              th:text="${sortField == 'fullName'} ? (${sortDir == 'asc'} ? '↑' : '↓') : '↕'">
+                            ↕
+                        </span>
+                    </a>
+                </th>
+
+                <!-- Email -->
+                <th>
+                    <a class="sort-link"
+                       th:href="@{/clients(sortField='email', sortDir=${reverseSortDir}, keyword=${keyword})}">
+                        Email
+                        <span class="sort-ico"
+                              th:text="${sortField == 'email'} ? (${sortDir == 'asc'} ? '↑' : '↓') : '↕'">
+                            ↕
+                        </span>
+                    </a>
+                </th>
+
+                <!-- Телефон -->
+                <th>
+                    <a class="sort-link"
+                       th:href="@{/clients(sortField='phone', sortDir=${reverseSortDir}, keyword=${keyword})}">
+                        Телефон
+                        <span class="sort-ico"
+                              th:text="${sortField == 'phone'} ? (${sortDir == 'asc'} ? '↑' : '↓') : '↕'">
+                            ↕
+                        </span>
+                    </a>
+                </th>
+
+                <!-- Тип клиента -->
+                <th style="width:180px;">
+                    <a class="sort-link"
+                       th:href="@{/clients(sortField='clientType', sortDir=${reverseSortDir}, keyword=${keyword})}">
+                        Тип
+                        <span class="sort-ico"
+                              th:text="${sortField == 'clientType'} ? (${sortDir == 'asc'} ? '↑' : '↓') : '↕'">
+                            ↕
+                        </span>
+                    </a>
+                </th>
+
+                <th style="width:260px;">Действия</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="c : ${clients}">
+                <td th:text="${c.id}">1</td>
+
+                <td>
+                    <div style="font-weight:900" th:text="${c.fullName}">Иванов Иван</div>
+                    <div class="small" th:if="${c.email != null and !#strings.isEmpty(c.email)}"
+                         th:text="${c.email}">ivanov@example.com</div>
+                </td>
+
+                <td th:text="${c.email}">ivanov@example.com</td>
+                <td th:text="${c.phone}">+7...</td>
+
+                <td>
+                    <span class="pill"
+                          th:if="${c.clientType == 'INDIVIDUAL'}">Физ. лицо</span>
+                    <span class="pill beige"
+                          th:if="${c.clientType != 'INDIVIDUAL'}">Корпоративный</span>
+                </td>
+
+                <td>
+                    <span sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+                        <div class="row-actions">
+                            <a class="a-mini" th:href="@{'/clients/' + ${c.id} + '/edit'}">✏️ Редактировать</a>
+
+                            <form th:action="@{'/clients/' + ${c.id} + '/delete'}"
+                                  method="post"
+                                  style="display:inline"
+                                  onsubmit="return confirm('Удалить этого клиента?');">
+                                <input type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}"/>
+                                <button class="a-mini danger" type="submit">🗑 Удалить</button>
+                            </form>
+                        </div>
+                    </span>
+                    <span sec:authorize="!hasAnyRole('MANAGER','ADMIN')" class="small">—</span>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(clients)}">
+                <td class="empty" colspan="6">Клиенты не найдены</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

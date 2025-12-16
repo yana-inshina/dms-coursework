@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">Заявка на ДМС</title>
+
+    <style>
+        :root{
+            --bg:#F6F0E6;
+            --card:#FFFFFF;
+            --ink:#1F2A37;
+            --muted:#6B7280;
+            --line:rgba(31,42,55,.10);
+            --blue:#11A6B7;
+            --blue-2:#0B8EA0;
+            --beige-2:#FFF8EE;
+            --shadow-soft:0 10px 24px rgba(31,42,55,.08);
+            --shadow:0 10px 30px rgba(17,166,183,.12);
+            --r:18px;
+        }
+
+        *{ box-sizing:border-box; }
+
+        body{
+            margin:0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color:var(--ink);
+            background:
+                    radial-gradient(900px 420px at 80% -10%, rgba(17,166,183,.18), transparent 60%),
+                    radial-gradient(700px 360px at 10% 0%, rgba(17,166,183,.10), transparent 55%),
+                    var(--bg);
+        }
+
+        .wrap{
+            max-width:1200px;
+            margin:0 auto;
+            padding:26px 16px 44px;
+        }
+
+        /* верхняя панель */
+        .topbar{
+            background:rgba(255,255,255,.72);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:14px 16px;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            box-shadow:var(--shadow-soft);
+            backdrop-filter:blur(8px);
+            flex-wrap:wrap;
+        }
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            min-width:260px;
+        }
+        .logo{
+            width:42px;
+            height:42px;
+            border-radius:14px;
+            background:linear-gradient(135deg, var(--blue), rgba(17,166,183,.55));
+            box-shadow:0 10px 22px rgba(17,166,183,.22);
+        }
+        .brand h1{
+            margin:0;
+            font-size:18px;
+        }
+        .brand p{
+            margin:2px 0 0;
+            font-size:12px;
+            color:var(--muted);
+        }
+
+        .chip{
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 10px;
+            border-radius:999px;
+            background:var(--beige-2);
+            border:1px solid rgba(31,42,55,.10);
+            font-size:13px;
+            white-space:nowrap;
+        }
+        .dot{
+            width:8px;
+            height:8px;
+            border-radius:50%;
+            background:var(--blue);
+            box-shadow:0 0 0 4px rgba(17,166,183,.12);
+        }
+
+        .spacer{ flex:1; }
+
+        .link-btn{
+            border-radius:12px;
+            padding:10px 12px;
+            font-weight:900;
+            border:1px solid rgba(17,166,183,.35);
+            background:#fff;
+            color:var(--blue-2);
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            white-space:nowrap;
+        }
+        .link-btn:hover{
+            background:rgba(17,166,183,.05);
+        }
+
+        /* блок описания */
+        .hero{
+            margin-top:14px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:18px;
+            box-shadow:var(--shadow-soft);
+            position:relative;
+            overflow:hidden;
+        }
+        .hero:before{
+            content:"";
+            position:absolute;
+            inset:-60px -90px auto auto;
+            width:240px;
+            height:240px;
+            border-radius:50%;
+            background:radial-gradient(circle at 30% 30%, rgba(17,166,183,.28), transparent 60%);
+            transform:rotate(12deg);
+        }
+        .hero h2{ margin:0 0 8px; }
+        .hero p{
+            margin:0;
+            max-width:70ch;
+            color:var(--muted);
+        }
+
+        /* карточка формы */
+        .form-card{
+            margin-top:14px;
+            max-width:760px;
+            background:var(--card);
+            border:1px solid var(--line);
+            border-radius:var(--r);
+            padding:18px;
+            box-shadow:var(--shadow-soft);
+        }
+        .form-grid{
+            display:flex;
+            flex-direction:column;
+            gap:14px;
+        }
+        .field{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+        }
+        .field label{
+            font-size:13px;
+            color:var(--muted);
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        textarea,
+        select{
+            padding:10px 12px;
+            border-radius:12px;
+            border:1px solid rgba(31,42,55,.18);
+            background:#fff;
+            outline:none;
+            font-size:14px;
+        }
+        input:focus,
+        textarea:focus,
+        select:focus{
+            border-color:var(--blue);
+            box-shadow:0 0 0 1px rgba(17,166,183,.35);
+        }
+        textarea{
+            min-height:80px;
+            resize:vertical;
+        }
+
+        .check-row{
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        .actions-row{
+            margin-top:6px;
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+        }
+
+        .btn{
+            border-radius:12px;
+            padding:9px 12px;
+            font-weight:900;
+            border:1px solid rgba(31,42,55,.14);
+            background:#fff;
+            cursor:pointer;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+        }
+        .btn-primary{
+            border-color:rgba(17,166,183,.35);
+            color:var(--blue-2);
+        }
+        .btn-primary:hover{
+            background:rgba(17,166,183,.05);
+        }
+
+        .hint{
+            font-size:12px;
+            color:var(--muted);
+        }
+    body {
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <!-- Верхняя панель -->
+    <div class="topbar">
+        <div class="brand">
+            <div class="logo"></div>
+            <div>
+                <h1 th:text="${title}">Заявка на программу ДМС</h1>
+                <p th:text="${item.program != null ? item.program.name : 'Программа не выбрана'}">
+                    Программа не выбрана
+                </p>
+            </div>
+        </div>
+
+        <!-- чип с базовой ценой / подсказкой -->
+        <div class="chip" th:if="${item.program != null}">
+            <span class="dot"></span>
+            Базовая цена программы:
+            <b th:text="${item.program.basePrice} + ' ₽'">10000 ₽</b>
+        </div>
+        <div class="chip" th:if="${item.program == null}">
+            <span class="dot"></span>
+            Сначала выберите программу
+        </div>
+
+        <div class="spacer"></div>
+
+        <a class="link-btn" th:href="@{/}">
+            ← На главную
+        </a>
+
+        <!-- кнопка для корпоративной заявки только если программа выбрана -->
+        <a class="link-btn"
+           th:if="${item.program != null}"
+           th:href="@{|/corporate-applications/new?programId=${item.program.id}|}"
+           sec:authorize="hasAnyRole('MANAGER','CORPORATE')">
+            Корпоративная заявка
+        </a>
+    </div>
+
+    <!-- Описание формы -->
+    <div class="hero">
+        <h2>Оставьте заявку</h2>
+        <p>
+            Выберите программу ДМС, укажите контактные данные и параметры страхования.
+            Система автоматически рассчитает примерную стоимость полиса,
+            а менеджер свяжется с вами для оформления.
+        </p>
+    </div>
+
+    <!-- Форма заявки физлица -->
+    <div class="form-card">
+        <form class="form-grid"
+              th:action="@{/applications/save}"
+              th:object="${item}"
+              method="post">
+
+            <!-- выбор программы -->
+            <!-- выбор программы -->
+            <div class="field">
+                <label for="programSelect">Программа ДМС</label>
+                <select id="programSelect" th:field="*{program.id}" required>
+                    <option value="" disabled
+                            th:selected="${item.program == null}">
+                        Выберите программу
+                    </option>
+                    <option th:each="p : ${allPrograms}"
+                            th:value="${p.id}"
+                            th:text="${p.name}"
+                            th:selected="${item.program != null and p.id == item.program.id}">
+                    </option>
+                </select>
+                <span class="hint">
+                    Базовая цена и расчёт премии зависят от выбранной программы.
+                </span>
+            </div>
+
+            <!-- Убрано поле выбора тарифного плана. Тариф будет назначен автоматически на сервере. -->
+
+            <!-- выбор региона обслуживания (FR‑08) -->
+            <div class="field">
+                <label for="regionSelect">Регион обслуживания</label>
+                <select id="regionSelect" th:field="*{region.id}" required>
+                    <option value="" disabled
+                            th:selected="${item.region == null}">
+                        Выберите регион
+                    </option>
+                    <option th:each="reg : ${allRegions}"
+                            th:value="${reg.id}"
+                            th:text="${reg.name}"
+                            th:selected="${item.region != null and reg.id == item.region.id}">
+                    </option>
+                </select>
+                <span class="hint">
+                    Регион обслуживания влияет на коэффициент стоимости.
+                </span>
+            </div>
+
+            <!-- выбор существующего клиента (по желанию) для менеджеров и администраторов -->
+            <div class="field" sec:authorize="hasAnyRole('MANAGER','ADMIN')">
+                <label for="clientSelect">Клиент</label>
+                <select id="clientSelect" name="clientId" required>
+                    <option value="" disabled selected>Выберите клиента</option>
+                    <option th:each="c : ${allClients}"
+                            th:value="${c.id}"
+                            th:text="${c.fullName + (c.email != null && c.email != '' ? ' (' + c.email + ')' : '')}">
+                    </option>
+                </select>
+                <span class="hint">
+                    Выберите клиента из списка. Если нужного клиента нет, создайте его в разделе «Клиенты».
+                </span>
+            </div>
+
+            <!-- Для обычного пользователя показываем поля для ввода своих данных -->
+            <div class="field" sec:authorize="!hasAnyRole('MANAGER','ADMIN')">
+                <label for="fullName">ФИО</label>
+                <input id="fullName" type="text" th:field="*{fullName}" required>
+            </div>
+            <div class="field" sec:authorize="!hasAnyRole('MANAGER','ADMIN')">
+                <label for="phone">Телефон</label>
+                <input id="phone" type="text" th:field="*{phone}" required>
+            </div>
+            <div class="field" sec:authorize="!hasAnyRole('MANAGER','ADMIN')">
+                <label for="email">Email</label>
+                <input id="email" type="email" th:field="*{email}" required>
+            </div>
+
+            <div class="field">
+                <label for="birthDate">Дата рождения основного застрахованного</label>
+                <input id="birthDate" type="date" th:field="*{birthDate}">
+            </div>
+
+            <div class="field">
+                <label for="insuredPersons">Количество застрахованных</label>
+                <input id="insuredPersons" type="number" min="1" th:field="*{insuredPersons}">
+            </div>
+
+            <div class="field">
+                <span>Дополнительные параметры</span>
+                <div class="check-row">
+                    <input id="chronic" type="checkbox" th:field="*{chronicDiseases}"/>
+                    <label for="chronic">Есть хронические заболевания</label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="comment">Комментарий</label>
+                <textarea id="comment" th:field="*{comment}"
+                          placeholder="Дополнительная информация, пожелания по программе..."></textarea>
+            </div>
+
+            <div class="actions-row">
+                <button class="btn btn-primary" type="submit">
+                    ➜ Рассчитать и отправить заявку
+                </button>
+                <a class="btn" th:href="@{/}">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>
